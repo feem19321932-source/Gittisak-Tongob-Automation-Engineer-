@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="th"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gittisak Tongob — Automation Engineer</title>
+<meta name="description" content="Automation Engineer เชี่ยวชาญ PLC, SCADA, Robotics และ Smart Factory | กิตติศักดิ์ ตองอบ">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="alternate icon" href="assets/favicon.svg">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://gittisak.dev/">
+<meta property="og:title" content="กิตติศักดิ์ ตองอบ — Automation Engineer">
+<meta property="og:description" content="Automation Engineer เชี่ยวชาญ PLC, SCADA, Robotics และ Smart Factory">
+<meta property="og:image" content="https://gittisak.dev/assets/og-image.svg">
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://gittisak.dev/">
+<meta property="twitter:title" content="กิตติศักดิ์ ตองอบ — Automation Engineer">
+<meta property="twitter:description" content="Automation Engineer เชี่ยวชาญ PLC, SCADA, Robotics และ Smart Factory">
+<meta property="twitter:image" content="https://gittisak.dev/assets/og-image.svg">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&amp;family=Noto+Sans+Thai:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+
+<!-- Stylesheet -->
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="site-nav" class="nav">
+  <div class="nav-inner">
+    <div class="logo" onclick="goHome()">
+      <span class="logo-dot"></span>
+      <span class="logo-text">GITTISAK TONGOB</span>
+    </div>
+    <div class="nav-links" id="nav-links-home">
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#work">Work</a>
+      <a href="javascript:void(0)" onclick="goToCerts()">Certifications</a>
+    </div>
+    <div class="nav-links" id="nav-links-certs" style="display:none;">
+      <a href="javascript:void(0)" onclick="goHome()">← Back Home</a>
+    </div>
+    <button onclick="toggleLanguage()" class="btn-lang" id="lang-toggle">EN</button>
+    <a href="#contact" class="btn-pill" id="nav-contact">Contact Me</a>
+  </div>
+</div>
+
+<!-- ============ HOME PAGE ============ -->
+<div id="page-home">
+
+  <div class="hero-wrap">
+    <div class="hero-panel-wrap">
+      <div class="hero-panel">
+        <div class="hero-panel-rings"></div>
+        <div class="hero-panel-sheen"></div>
+        <div class="hero-badge">Automation Engineer ✦</div>
+      </div>
+      <div class="hero-photo">
+        <img src="assets/profile-photo.jpg" alt="Gittisak Tongob">
+      </div>
+    </div>
+    <div class="hero-info">
+      <div class="hero-spacer"></div>
+      <div class="hero-text">
+        <h1>กิตติศักดิ์ ตองอบ</h1>
+        <div class="hero-role">Automation Engineer</div>
+        <p class="hero-bio">จบการศึกษาระดับปริญญาตรี คณะวิศวกรรมศาสตร์ สาขาวิศวกรรมเมคคาทรอนิกส์และหุ่นยนต์ ผ่านการฝึกงานด้านการซ่อมประกอบคอมพิวเตอร์ ระบบเครือข่าย IoT และระบบอัตโนมัติ สนใจงานด้านระบบอัตโนมัติและ Smart Factory</p>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-value">2025</div><div class="stat-label">เริ่มทำงานเป็น Automation Engineer</div></div>
+        <div class="stat"><div class="stat-value">3</div><div class="stat-label">Internship Experiences</div></div>
+        <div class="stat"><div class="stat-value">4+</div><div class="stat-label">Certifications &amp; Trainings</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="marquee">
+    <div class="marquee-track" id="marquee-track"></div>
+  </div>
+
+  <div id="about" class="section">
+    <h2 class="h2">Experience</h2>
+    <div id="experience-list"></div>
+  </div>
+
+  <div id="internship" class="section">
+    <h2 class="h2">Internship Experience</h2>
+    <div id="internship-list"></div>
+  </div>
+
+  <div id="skills" class="section">
+    <h2 class="h2">Skills</h2>
+    <div class="skill-groups">
+      <div class="skill-group"><div class="skill-title">PLC &amp; Control</div><div class="skill-tags"><span>PLC (Mitsubishi)</span><span>Microcontroller (C++, IoT)</span></div></div>
+      <div class="skill-group"><div class="skill-title">SCADA / HMI</div><div class="skill-tags"><span>SCADA Genesis64</span><span>HMI</span></div></div>
+      <div class="skill-group"><div class="skill-title">Programming</div><div class="skill-tags"><span>Python</span><span>C#</span><span>C++</span><span>HTML</span><span>CSS</span><span>JavaScript</span></div></div>
+      <div class="skill-group"><div class="skill-title">Robotics</div><div class="skill-tags"><span>KUKA Robot</span></div></div>
+      <div class="skill-group"><div class="skill-title">CAD / Design</div><div class="skill-tags"><span>Fusion 360</span><span>Inventor</span></div></div>
+    </div>
+  </div>
+
+  <div id="work" class="section">
+    <h2 class="h2">Education</h2>
+    <div class="edu-grid">
+      <div class="edu-card"><div class="edu-year">2025</div><h3>ปริญญาตรี วิศวกรรมศาสตร์</h3><div class="edu-field">Mechatronics and Robotics Engineering</div><div class="edu-school">มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน วิทยาเขตขอนแก่น</div></div>
+      <div class="edu-card"><div class="edu-year">2023</div><h3>ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.)</h3><div class="edu-field">Computer Network System</div><div class="edu-school">วิทยาลัยเทคนิคศรีสะเกษ</div></div>
+      <div class="edu-card"><div class="edu-year">2021</div><h3>ประกาศนียบัตรวิชาชีพ (ปวช.)</h3><div class="edu-field">Computer Technology</div><div class="edu-school">วิทยาลัยเทคนิคศรีสะเกษ</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head-row">
+      <h2 class="h2" style="margin:0;">Featured Certifications</h2>
+      <a href="javascript:void(0)" onclick="goToCerts()" class="btn-outline-pill">View All →</a>
+    </div>
+    <div class="cert-grid" id="cert-grid-home"></div>
+  </div>
+
+  <div id="contact" class="section contact-section">
+    <h2 class="h2-center">Let's Collaborate</h2>
+    <div class="contact-actions">
+      <button onclick="window.print()" class="btn-outline-pill">Download PDF</button>
+    </div>
+    <div id="contact-form-block" class="contact-form">
+      <input type="text" id="f-name" placeholder="ชื่อของคุณ">
+      <input type="email" id="f-email" placeholder="you@email.com">
+      <textarea id="f-message" placeholder="ข้อความของคุณ" rows="4"></textarea>
+      <button onclick="sendMail()" class="btn-solid">Send Message</button>
+    </div>
+    <div class="contact-strip">
+      <div>Email: <span>Feem19321932@gmail.com</span></div>
+      <div>Phone: <span>098-504-2932</span></div>
+      <div>Location: <span>ขุขันธ์, ศรีสะเกษ</span></div>
+    </div>
+  </div>
+
+  <div class="footer">© 2026 Gittisak Tongob</div>
+</div>
+
+<!-- ============ CERTIFICATIONS PAGE ============ -->
+<div id="page-certs" style="display:none;">
+  <div class="certs-wrap">
+    <h1 class="h1">Certifications &amp; Projects</h1>
+    <div class="cert-grid" id="cert-grid-page"></div>
+
+    <h2 class="h2">Bachelor's Thesis Project</h2>
+    <div class="thesis-card">
+      <div class="thesis-issuer">RAJAMANGALA UNIVERSITY OF TECHNOLOGY ISAN, KHON KAEN — 2025</div>
+      <h3>ประเมินความสามารถของกระบวนการ Laser Weld Housing &amp; Inlet Disc และ Diffuser &amp; Bottle</h3>
+      <div class="thesis-en">Evaluate the Capabilities of the Laser Weld Housing &amp; Inlet Disc and Diffuser &amp; Bottle (Laser Welding) Processes</div>
+      <div class="thesis-dept">Department of Mechatronics and Robotics Engineering, Faculty of Engineering</div>
+      <a href="assets/thesis.pdf" target="_blank" class="btn-outline-pill">View Full Thesis (PDF)</a>
+    </div>
+
+    <div class="back-home">
+      <a href="javascript:void(0)" onclick="goHome()" class="btn-outline-pill">← Back to Resume</a>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+
+
+</body></html>

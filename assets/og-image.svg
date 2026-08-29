@@ -1,0 +1,19 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#0a0a0a"/>
+
+  <!-- Accent pattern -->
+  <circle cx="100" cy="100" r="80" fill="#d7ff3d" opacity="0.1"/>
+  <circle cx="1100" cy="530" r="120" fill="#d7ff3d" opacity="0.08"/>
+
+  <!-- Content -->
+  <text x="100" y="280" font-family="'Source Serif 4', serif" font-weight="700" font-size="72" fill="#f5f5f0">กิตติศักดิ์ ตองอบ</text>
+  <text x="100" y="340" font-family="'Noto Sans Thai', sans-serif" font-weight="600" font-size="48" fill="#d7ff3d">Automation Engineer</text>
+
+  <!-- Badge -->
+  <rect x="100" y="400" width="380" height="60" rx="30" fill="#141412" stroke="#333330" stroke-width="2"/>
+  <text x="290" y="438" font-family="'Source Serif 4', serif" font-weight="700" font-size="24" fill="#d7ff3d" text-anchor="middle">SMART FACTORY ✦</text>
+
+  <!-- Domain -->
+  <text x="100" y="550" font-family="'Noto Sans Thai', sans-serif" font-weight="500" font-size="28" fill="#9a9a95">gittisak.dev</text>
+</svg>
