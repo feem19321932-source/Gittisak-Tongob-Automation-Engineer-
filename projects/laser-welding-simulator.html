@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laser Welding Simulator — Gittisak Tongob</title>
+<meta name="description" content="จำลองเครื่องเชื่อมเลเซอร์ Galvo Scanner และ Wobble Head ปรับ Power, Speed, Focus แล้วดูภาคตัดรอยเชื่อมและ Process Window — จากปริญญานิพนธ์ของ กิตติศักดิ์ ตองอบ">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#0a0a0a; --card:#141412; --card2:#1b1b18; --ink:#f5f5f0; --muted:#9a9a95; --muted2:#c9c7c2; --line:#2a2a26; --line2:#333330; --lime:#d7ff3d; --ok:#7fd36a; --ng:#ff6b5c; --warn:#f5b942; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; background:var(--bg); color:var(--ink); font-family:'Noto Sans Thai','Inter',sans-serif; font-size:14px; -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+  ::selection { background:var(--lime); color:var(--bg); }
+  .topnav { position:sticky; top:0; z-index:50; background:rgba(10,10,10,.9); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); }
+  .topnav-in { max-width:1400px; margin:0 auto; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .logo { display:flex; align-items:center; gap:10px; color:var(--ink); text-decoration:none; font-family:'Source Serif 4',serif; font-weight:700; font-size:16px; }
+  .logo i { width:14px; height:14px; background:var(--lime); border-radius:50%; display:inline-block; }
+  .nav-r { display:flex; gap:8px; }
+  .back { color:var(--ink); text-decoration:none; border:1px solid var(--line2); padding:9px 16px; border-radius:999px; font-size:13px; font-weight:600; transition:all .2s; white-space:nowrap; }
+  .back:hover { border-color:var(--lime); color:var(--lime); }
+  header { max-width:1400px; margin:0 auto; padding:34px 24px 4px; }
+  .eyebrow { color:var(--lime); font-size:12px; letter-spacing:1.5px; font-weight:600; margin-bottom:10px; }
+  h1, h2, h3 { font-family:'Source Serif 4','Noto Sans Thai',serif; margin:0; }
+  header h1 { font-size:38px; line-height:1.2; }
+  header .sub { font-size:15px; color:var(--muted2); margin-top:10px; line-height:1.7; max-width:900px; }
+  .disclaimer { max-width:1352px; margin:16px auto 0; background:rgba(245,185,66,.08); border:1px solid rgba(245,185,66,.35); border-radius:12px; padding:10px 16px; font-size:12.5px; line-height:1.6; color:#f0d9a4; }
+
+  .tabs { max-width:1400px; margin:18px auto 0; padding:0 24px; display:flex; gap:10px; flex-wrap:wrap; }
+  .tab { background:transparent; color:var(--ink); border:1px solid var(--line2); border-radius:999px; padding:10px 18px; font-family:inherit; font-size:14px; font-weight:600; cursor:pointer; transition:all .2s; text-align:left; }
+  .tab small { display:block; font-weight:500; font-size:11.5px; color:var(--muted); }
+  .tab:hover { border-color:var(--lime); }
+  .tab.on { background:var(--lime); color:var(--bg); border-color:var(--lime); }
+  .tab.on small { color:#2b3300; }
+
+  .wrap { max-width:1400px; margin:0 auto; display:grid; grid-template-columns:minmax(0,1.5fr) minmax(330px,1fr); gap:16px; padding:16px 24px 60px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:16px 18px; min-width:0; }
+  .card h2 { font-size:17px; margin-bottom:12px; }
+  .col { display:flex; flex-direction:column; gap:16px; min-width:0; }
+  #view { width:100%; height:520px; position:relative; border-radius:12px; overflow:hidden; background:#1c1d1b; touch-action:none; }
+  #view canvas { display:block; width:100%; height:100%; }
+  .hud { position:absolute; left:12px; top:12px; background:rgba(10,10,10,.82); border:1px solid var(--line2); border-radius:10px; padding:8px 12px; font-size:12px; line-height:1.6; color:var(--muted2); pointer-events:none; }
+  .hud b { color:var(--lime); }
+  .hint { position:absolute; right:12px; bottom:12px; background:rgba(10,10,10,.8); border:1px solid var(--line2); border-radius:10px; padding:6px 10px; font-size:11.5px; color:var(--muted); pointer-events:none; }
+  .labels { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+  .labels span { position:absolute; left:0; top:0; white-space:nowrap; font-size:11px; line-height:1; padding:4px 8px; border-radius:999px; background:rgba(10,10,10,.78); border:1px solid var(--line2); color:var(--muted2); }
+  #loading { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--lime); background:rgba(10,10,10,.85); }
+  .row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+  button.b { background:transparent; color:var(--ink); border:1px solid var(--line2); border-radius:999px; padding:8px 16px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; transition:all .2s; }
+  button.b:hover { border-color:var(--lime); color:var(--lime); }
+  button.b.pri { background:var(--lime); color:var(--bg); border-color:var(--lime); }
+  button.b.pri:hover { color:var(--bg); box-shadow:0 4px 16px rgba(215,255,61,.3); }
+
+  .ctl { margin-top:4px; }
+  .ctl label { display:flex; justify-content:space-between; align-items:baseline; font-size:13px; color:var(--muted2); margin:12px 0 4px; }
+  .ctl label b { color:var(--ink); font-variant-numeric:tabular-nums; font-weight:600; }
+  .ctl label .opt { font-size:11px; color:var(--muted); font-weight:400; margin-left:6px; }
+  input[type=range] { width:100%; accent-color:var(--lime); }
+
+  .metrics { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px; }
+  .m { background:var(--card2); border:1px solid var(--line); border-radius:12px; padding:10px 12px; }
+  .m .t { font-size:11.5px; color:var(--muted); display:flex; justify-content:space-between; gap:6px; }
+  .m .v { font-family:'Source Serif 4',serif; font-size:22px; font-weight:700; margin-top:2px; font-variant-numeric:tabular-nums; }
+  .m .s { font-size:11px; color:var(--muted); margin-top:2px; }
+  .badge { font-size:11px; font-weight:700; padding:1px 8px; border-radius:999px; white-space:nowrap; }
+  .badge.ok { background:rgba(127,211,106,.15); color:var(--ok); }
+  .badge.ng { background:rgba(255,107,92,.15); color:var(--ng); }
+  .badge.warn { background:rgba(245,185,66,.15); color:var(--warn); }
+  .verdict { margin-top:10px; padding:10px 12px; border-radius:12px; font-weight:600; font-size:14px; display:flex; align-items:center; gap:8px; }
+  .verdict.ok { background:rgba(127,211,106,.1); border:1px solid rgba(127,211,106,.35); color:var(--ok); }
+  .verdict.ng { background:rgba(255,107,92,.1); border:1px solid rgba(255,107,92,.35); color:var(--ng); }
+
+  .figs { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .fig svg, .fig canvas { display:block; width:100%; height:auto; }
+  .cap { font-size:12px; color:var(--muted); margin-top:8px; line-height:1.6; }
+  .legend { display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--muted2); margin-top:8px; }
+  .legend i { display:inline-block; width:12px; height:12px; border-radius:3px; vertical-align:-2px; margin-right:6px; }
+  .note { font-size:12.5px; color:var(--muted); line-height:1.7; }
+  .note b { color:var(--muted2); }
+  .footer { text-align:center; padding:26px; color:#5a5a55; font-size:13px; border-top:1px solid var(--line); }
+
+  @media (max-width: 1000px) {
+    .wrap { display:flex; flex-direction:column; }
+    .wrap > .col { display:contents; }
+    .o1 { order:1; } .o2 { order:2; } .o3 { order:3; } .o4 { order:4; } .o5 { order:5; }
+    .figs { grid-template-columns:1fr; }
+    #view { height:420px; }
+  }
+  @media (max-width: 768px) {
+    .topnav-in { padding:12px 16px; }
+    .logo { font-size:13px; }
+    .back { padding:8px 12px; font-size:12px; }
+    .nav-r .back.hide-sm { display:none; }
+    header { padding:26px 16px 4px; }
+    header h1 { font-size:27px; }
+    .disclaimer { margin:14px 16px 0; }
+    .tabs { padding:0 16px; }
+    .tab { flex:1 1 0; min-width:0; padding:9px 12px; font-size:13px; }
+    .wrap { padding:14px 16px 40px; }
+    .card { padding:14px; }
+    #view { height:340px; }
+    .hud { font-size:10.5px; padding:6px 9px; line-height:1.5; left:8px; top:8px; }
+    .hint { display:none; }
+    .labels span { font-size:9.5px; padding:3px 6px; }
+  }
+</style>
+</head>
+<body>
+<nav class="topnav"><div class="topnav-in">
+  <a class="logo" href="../index.html"><i></i>GITTISAK TONGOB</a>
+  <div class="nav-r">
+    <a class="back hide-sm" href="senior-project-laser-welding.html">สรุปโปรเจกต์</a>
+    <a class="back" href="../index.html#projects">← Back to Resume</a>
+  </div>
+</div></nav>
+
+<header>
+  <div class="eyebrow">INTERACTIVE · LASER WELDING SIMULATOR</div>
+  <h1>Laser Welding Simulator</h1>
+  <div class="sub">จำลองเครื่องเชื่อมเลเซอร์จาก Senior Project — ปรับกำลังเลเซอร์ ความเร็วหมุน และตำแหน่งโฟกัส แล้วดูรอยเชื่อม ภาคตัด และ Process Window เปลี่ยนตามทันที เทียบกับเกณฑ์จริงที่ใช้ประเมิน</div>
+</header>
+<div class="disclaimer">⚠ เป็น<b>การจำลองเชิงหลักการ</b> ไม่ใช่การคำนวณความร้อนจริง: ตัวเครื่องเป็นโมเดลที่สร้างขึ้นตามลักษณะการจัดวางของเครื่องจริง (ไม่ใช่ CAD เครื่องจริง ไม่ตามสเกล) และขนาดรอยเชื่อมคำนวณจากสูตรประมาณที่ปรับให้ตรงกับตัวเลขในปริญญานิพนธ์ — ค่าที่เหมาะสม ช่วงความกว้าง/ความลึกที่วัดได้ และผลการเลื่อนโฟกัส ใช้เพื่ออธิบายแนวคิดเท่านั้น</div>
+
+<div class="tabs" role="tablist">
+  <button class="tab on" data-proc="hid" role="tab">Housing &amp; Inlet Disc<small>Galvo Scanner Head</small></button>
+  <button class="tab" data-proc="db" role="tab">Diffuser &amp; Bottle<small>Wobble Head</small></button>
+</div>
+
+<div class="wrap">
+  <div class="col">
+    <div class="card o1">
+      <h2 id="viewTitle">เครื่องเชื่อม</h2>
+      <div id="view">
+        <div id="loading">กำลังโหลดฉาก 3D…</div>
+        <div class="hud" id="hud"></div>
+        <div class="hint">ลาก = หมุนมุมมอง · ล้อเมาส์/ถ่างนิ้ว = ซูม</div>
+      </div>
+      <div class="row">
+        <button class="b pri" id="btnRun">▶ เริ่มเชื่อม</button>
+        <button class="b" id="btnClear">⟲ ชิ้นงานใหม่</button>
+        <button class="b" id="btnOpt">✦ ค่าที่เหมาะสม (จากเล่ม)</button>
+        <button class="b" id="btnCam">มุมกล้อง: ภาพรวม</button>
+        <button class="b" id="btnLab">ป้ายชื่อ: เปิด</button>
+      </div>
+      <div class="note" id="headNote" style="margin-top:12px"></div>
+    </div>
+    <div class="figs o4">
+      <div class="card fig">
+        <h2>ภาคตัดรอยเชื่อม</h2>
+        <svg id="xsec" viewBox="0 0 360 270" role="img" aria-label="ภาคตัดรอยเชื่อมจำลอง"></svg>
+        <div class="cap">รูปทรงเปลี่ยนตามค่าที่ตั้ง · เส้นประแดง = ขอบเขตเกณฑ์ (LSL/USL) · ไม่ตามสเกล</div>
+      </div>
+      <div class="card fig">
+        <h2>Process Window</h2>
+        <canvas id="pw" width="360" height="270" role="img" aria-label="แผนที่ Process Window ของกำลังเลเซอร์และความเร็ว"></canvas>
+        <div class="legend"><span><i style="background:rgba(127,159,12,.75)"></i>ผ่านเกณฑ์</span><span><i style="background:#2a2a26"></i>ไม่ผ่าน</span><span><i style="background:#f5f5f0;border-radius:50%"></i>ค่าปัจจุบัน</span><span><i style="border:2px solid #d7ff3d;border-radius:50%;background:transparent"></i>ค่าจากเล่ม</span></div>
+        <div class="cap">Power × Speed ที่ตำแหน่งโฟกัสปัจจุบัน — ลองเลื่อน Focus แล้วดูว่าพื้นที่ OK หดลง</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="card o2">
+      <h2>พารามิเตอร์</h2>
+      <div class="ctl" id="ctl"></div>
+    </div>
+    <div class="card o3">
+      <h2>ผลรอยเชื่อม</h2>
+      <div class="metrics" id="metrics"></div>
+      <div class="verdict" id="verdict"></div>
+    </div>
+    <div class="card o5">
+      <h2>ลองทำดู</h2>
+      <div class="note" id="tryNote"></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">© 2026 Gittisak Tongob</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+/* =========================================================
+   1) PROCESS MODELS — empirical, calibrated to thesis numbers
+   ========================================================= */
+const PROC = {
+  hid: {
+    name: 'Housing & Inlet Disc', head: 'Galvo Scanner Head',
+    params: [
+      { k: 'P', label: 'Laser Power', unit: 'W', min: 500, max: 1500, step: 10, opt: 1000, dp: 0 },
+      { k: 'v', label: 'Rotation Speed (scan)', unit: 'mm/s', min: 40, max: 110, step: 0.5, opt: 70, dp: 1 },
+      { k: 'Z', label: 'Focus Z', unit: 'mm', min: 112.0, max: 114.0, step: 0.05, opt: 113.0, dp: 2 },
+    ],
+    // e: line energy relative to the thesis optimum (1000 W / 70 mm/s)
+    calc(p) {
+      const e = (p.P / p.v) / (1000 / 70);
+      const fd = 1 / (1 + ((p.Z - 113.0) / 0.5) ** 2);          // defocus loss
+      const depth = 0.35 * e ** 0.9 * fd;
+      const width = 0.63 * e ** 0.4 * (1 + 0.35 * (1 - fd));     // defocus spreads the bead
+      const vari = 0.03 + 0.08 * (1 - fd);
+      return { e, fd, depth, width, vari };
+    },
+    metrics(r) {
+      return [
+        { t: 'Width', v: r.width, u: 'mm', spec: '0.33 – 0.80 mm', ok: r.width >= 0.33 && r.width <= 0.80 },
+        { t: 'Depth', v: r.depth, u: 'mm', spec: '≥ 0.15 mm', ok: r.depth >= 0.15 },
+        { t: 'Depth spread (±)', v: r.vari, u: 'mm', spec: 'เล่ม: ±0.05 mm ที่ค่าเหมาะสม', ok: r.vari <= 0.05, soft: true },
+        { t: 'Line energy', v: r.e * 1000 / 70, u: 'J/mm', spec: 'P ÷ v', info: true },
+      ];
+    },
+    pass(r) { return r.width >= 0.33 && r.width <= 0.80 && r.depth >= 0.15; },
+    note: '<b>Galvo Scanner Head</b> — ชิ้นงานอยู่นิ่งบนโต๊ะ X/Y กระจก 2 บานบนมอเตอร์ galvanometer เบนลำแสงผ่านเลนส์ F-theta และแผ่น cover glass กวาดเป็นวงบน Inlet Disc หัวเชื่อมเลื่อนขึ้นลงบนแกน Z เพื่อตั้งโฟกัส',
+    tries: [
+      'กด <b>เริ่มเชื่อม</b> ด้วยค่าจากเล่ม (1000 W · 70 mm/s · Z 113.0) — Width ≈ 0.63, Depth ≈ 0.35 mm อยู่ในช่วงที่วัดได้จริง 0.60–0.66 / 0.32–0.38 mm',
+      'ลด Power เหลือ ~550 W หรือเร่ง Speed สุด — พลังงานต่อความยาวไม่พอ Depth ต่ำกว่า 0.15 mm → NG',
+      'เพิ่ม Power สุดและลด Speed — รอยเชื่อมกว้างเกิน USL 0.80 mm → NG',
+      'เลื่อน Focus Z ออกจาก 113.0 — แสงกระจาย รอยตื้นลงและกว้างขึ้น พื้นที่ OK ใน Process Window หดลง',
+    ],
+  },
+  db: {
+    name: 'Diffuser & Bottle', head: 'Wobble Head',
+    params: [
+      { k: 'P', label: 'Laser Power', unit: 'W', min: 1500, max: 4500, step: 50, opt: 3200, dp: 0 },
+      { k: 'v', label: 'Rotation Speed', unit: 'm/min', min: 1.0, max: 4.0, step: 0.1, opt: 2.0, dp: 1 },
+      { k: 'Z', label: 'Focus Z', unit: 'mm', min: 299.5, max: 302.5, step: 0.05, opt: 301.0, dp: 2 },
+      { k: 'Y', label: 'Focus Y', unit: 'mm', min: 190.5, max: 191.5, step: 0.05, opt: 191.0, dp: 2 },
+    ],
+    calc(p) {
+      const e = (p.P / p.v) / (3200 / 2.0);
+      const fz = 1 / (1 + ((p.Z - 301.0) / 0.6) ** 2);
+      const dy = p.Y - 191.0;
+      const fy = dy > 0 ? Math.max(0.2, 1 - 0.42 * dy) : 1;     // thesis: Y 191.3–191.4 → depth 2.58–2.39
+      const depth = 2.91 * e ** 0.8 * fz * fy;
+      const diff = 0.12 + (dy < 0 ? 2.75 * -dy : 0.3 * dy) + 0.4 * (1 - fz); // thesis: Y 190.8–190.9 → diff 0.50–0.67
+      const outer = 1.5 * e ** 0.35 * (1 + 0.3 * (1 - fz));
+      const inner = Math.max(0, 0.6 * e ** 0.7 * fz * fy);
+      return { e, fz, fy, depth, diff, outer, inner };
+    },
+    metrics(r) {
+      return [
+        { t: 'Depth', v: r.depth, u: 'mm', spec: '≥ 1.60 mm', ok: r.depth >= 1.60 },
+        { t: 'Weld outer width', v: r.outer, u: 'mm', spec: '≥ 0.10 mm', ok: r.outer >= 0.10 },
+        { t: 'Weld inner width', v: r.inner, u: 'mm', spec: '≥ 0.10 mm', ok: r.inner >= 0.10 },
+        { t: 'Depth difference', v: r.diff, u: 'mm', spec: 'เล่ม: 0.12 mm ที่ค่าเหมาะสม', ok: r.diff <= 0.3, soft: true },
+      ];
+    },
+    pass(r) { return r.depth >= 1.60 && r.outer >= 0.10 && r.inner >= 0.10; },
+    note: '<b>Wobble Head</b> — หัวเชื่อมยิงจากด้านบน เอียง 16° (แกน θ) ลงที่รอยต่อ Diffuser กับ Bottle ชิ้นงานตั้งบนโต๊ะหมุน ลำแสงส่ายเป็นวงเล็กๆ (wobble) ทำให้บ่อหลอมกว้างและเสถียรขึ้น รอยบนแนวเชื่อมจึงเป็นเกลียวต่อกัน',
+    tries: [
+      'ค่าจากเล่ม 3200 W · 2.0 m/min · Z 301.0 · Y 191.0 — Depth เฉลี่ย ≈ 2.91 mm ความต่างความลึกเพียง 0.12 mm',
+      'เลื่อน Focus Y ไป 191.3–191.4 — รอยเชื่อมตื้นลงเหลือ ≈ 2.58–2.39 mm ตรงกับผลในเล่ม',
+      'เลื่อน Focus Y ไป 190.8–190.9 — ความลึกยังได้ แต่ความต่างระหว่างจุดวัดสูง (≈ 0.5–0.67 mm) รอยไม่สม่ำเสมอ',
+      'ลด Power และเร่ง Speed จนพลังงานต่อความยาวต่ำ — Depth ต่ำกว่า LSL 1.60 mm → NG',
+    ],
+  },
+};
+
+let procKey = 'hid';
+const state = { hid: {}, db: {} };
+for (const k in PROC) PROC[k].params.forEach(p => state[k][p.k] = p.opt);
+
+/* =========================================================
+   2) UI — sliders, metrics, verdict
+   ========================================================= */
+const $ = (id) => document.getElementById(id);
+function buildControls() {
+  const P = PROC[procKey];
+  $('ctl').innerHTML = P.params.map(p => `
+    <label for="s_${p.k}">${p.label}<span><b id="o_${p.k}"></b> ${p.unit}<span class="opt">เล่ม ${p.opt.toFixed(p.dp)}</span></span></label>
+    <input type="range" id="s_${p.k}" min="${p.min}" max="${p.max}" step="${p.step}" value="${state[procKey][p.k]}">`).join('');
+  P.params.forEach(p => $('s_' + p.k).addEventListener('input', (e) => { state[procKey][p.k] = +e.target.value; update(); }));
+  $('headNote').innerHTML = P.note;
+  $('tryNote').innerHTML = '<ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px">' + P.tries.map(t => `<li>${t}</li>`).join('') + '</ul>';
+  $('viewTitle').textContent = `${P.name} — ${P.head}`;
+}
+function update() {
+  const P = PROC[procKey], s = state[procKey];
+  P.params.forEach(p => { $('o_' + p.k).textContent = s[p.k].toFixed(p.dp); $('s_' + p.k).value = s[p.k]; });
+  const r = P.calc(s);
+  $('metrics').innerHTML = P.metrics(r).map(m => {
+    const badge = m.info ? '' : `<span class="badge ${m.ok ? 'ok' : (m.soft ? 'warn' : 'ng')}">${m.ok ? 'OK' : (m.soft ? 'เฝ้าระวัง' : 'NG')}</span>`;
+    return `<div class="m"><div class="t">${m.t}${badge}</div><div class="v">${m.v.toFixed(2)} <span style="font-size:13px;color:#9a9a95">${m.u}</span></div><div class="s">${m.spec}</div></div>`;
+  }).join('');
+  const ok = P.pass(r);
+  const v = $('verdict');
+  v.className = 'verdict ' + (ok ? 'ok' : 'ng');
+  v.textContent = ok ? '✓ ผ่านเกณฑ์ — ใช้ค่านี้ผลิตได้' : '✕ ไม่ผ่านเกณฑ์ — ต้องปรับพารามิเตอร์';
+  drawXsec(r);
+  drawPW();
+  sim.setParams(procKey, s, r, ok);
+}
+
+/* =========================================================
+   3) CROSS-SECTION SVG (live)
+   ========================================================= */
+function drawXsec(r) {
+  const svg = $('xsec');
+  const hatch = `<defs><pattern id="xh" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" stroke="#3d3d38" stroke-width="2"/></pattern>
+    <linearGradient id="xg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d7ff3d"/><stop offset="1" stop-color="#6d8a08"/></linearGradient>
+    <marker id="xa" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 1 L9 5 L0 9 Z" fill="#c9c7c2"/></marker></defs>`;
+  const cx = 180, top = 60;
+  let body = '';
+  if (procKey === 'hid') {
+    const S = 200, td = 64;                       // px per mm; disc drawn 64 px thick (not to scale)
+    const yi = top + td;                          // interface Disc / Housing
+    const w = r.width * S, d = Math.min(r.depth * S, 118), wt = w * 1.25;
+    const lsl = 0.15 * S, usl = 0.80 * S, lslW = 0.33 * S;
+    const hp = `M20 ${yi} H340 V250 H300 Q286 ${yi + 60} 250 ${yi + 22} H20 Z`;
+    body += `<rect x="20" y="${top}" width="320" height="${td}" fill="#33342f"/><rect x="20" y="${top}" width="320" height="${td}" fill="url(#xh)"/>
+      <path d="${hp}" fill="#232320"/><path d="${hp}" fill="url(#xh)" opacity=".55"/>
+      <line x1="20" y1="${yi}" x2="340" y2="${yi}" stroke="#55554f"/>
+      <text x="28" y="${top + 18}" fill="#c9c7c2" font-size="12">Inlet Disc</text><text x="332" y="244" fill="#9a9a95" font-size="12" text-anchor="end">Housing</text>
+      <path d="M${cx - wt / 2} ${top} L${cx - w / 2} ${yi} Q${cx - w / 2 + 3} ${yi + d * 0.95} ${cx} ${yi + d} Q${cx + w / 2 - 3} ${yi + d * 0.95} ${cx + w / 2} ${yi} L${cx + wt / 2} ${top} Z" fill="url(#xg)"/>
+      <line x1="40" y1="${yi + lsl}" x2="230" y2="${yi + lsl}" stroke="#ff6b5c" stroke-dasharray="4 4" opacity=".8"/>
+      <text x="44" y="${yi + lsl + 14}" fill="#ff6b5c" font-size="11">LSL depth 0.15</text>
+      <line x1="${cx - usl / 2}" y1="${yi - 16}" x2="${cx - usl / 2}" y2="${yi + 8}" stroke="#ff6b5c" stroke-dasharray="3 3" opacity=".8"/>
+      <line x1="${cx + usl / 2}" y1="${yi - 16}" x2="${cx + usl / 2}" y2="${yi + 8}" stroke="#ff6b5c" stroke-dasharray="3 3" opacity=".8"/>
+      <text x="${cx + usl / 2 + 5}" y="${yi - 6}" fill="#ff6b5c" font-size="11">USL 0.80</text>
+      <text x="${cx}" y="${top - 30}" fill="#f5f5f0" font-size="13" font-weight="600" text-anchor="middle">W ${r.width.toFixed(2)} mm (ที่รอยต่อ)</text>
+      <line x1="${cx - w / 2}" y1="${top - 20}" x2="${cx - w / 2}" y2="${yi}" stroke="#f5f5f0" stroke-opacity=".5" stroke-dasharray="2 3"/>
+      <line x1="${cx + w / 2}" y1="${top - 20}" x2="${cx + w / 2}" y2="${yi}" stroke="#f5f5f0" stroke-opacity=".5" stroke-dasharray="2 3"/>
+      <line x1="${cx - w / 2 + 3}" y1="${top - 14}" x2="${cx + w / 2 - 3}" y2="${top - 14}" stroke="#f5f5f0" marker-start="url(#xa)" marker-end="url(#xa)"/>
+      <line x1="${cx + w / 2 + 16}" y1="${yi + 2}" x2="${cx + w / 2 + 16}" y2="${yi + d - 2}" stroke="#f5f5f0" marker-start="url(#xa)" marker-end="url(#xa)"/>
+      <text x="${cx + w / 2 + 23}" y="${yi + d / 2 + 5}" fill="#f5f5f0" font-size="13" font-weight="600">D ${r.depth.toFixed(2)}</text>`;
+  } else {
+    const S = 55; // px per mm
+    const ow = r.outer * S, iw = Math.max(r.inner * S, 2), d = r.depth * S, lsl = 1.6 * S;
+    const t = 34, h = 222;
+    const mid = t + d * 0.32;
+    body += `<rect x="20" y="${t}" width="160" height="${h}" fill="#2a2a26"/><rect x="20" y="${t}" width="160" height="${h}" fill="url(#xh)"/>
+      <rect x="180" y="${t}" width="160" height="${h}" fill="#232320"/><rect x="180" y="${t}" width="160" height="${h}" fill="url(#xh)" opacity=".6"/>
+      <text x="28" y="${t + h - 8}" fill="#9a9a95" font-size="12">Diffuser</text><text x="332" y="${t + h - 8}" fill="#9a9a95" font-size="12" text-anchor="end">Bottle</text>
+      <g transform="rotate(16 ${cx} ${t})"><line x1="${cx}" y1="${t}" x2="${cx}" y2="${t + h}" stroke="#55554f" stroke-dasharray="5 4"/><path d="M${cx - ow / 2} ${t} C${cx - ow / 2 + ow * 0.18} ${t + 10} ${cx - iw / 2 - 2} ${mid - 14} ${cx - iw / 2} ${mid} L${cx - iw / 2 + 1} ${t + d - iw / 2} Q${cx} ${t + d + 4} ${cx + iw / 2 - 1} ${t + d - iw / 2} L${cx + iw / 2} ${mid} C${cx + iw / 2 + 2} ${mid - 14} ${cx + ow / 2 - ow * 0.18} ${t + 10} ${cx + ow / 2} ${t} Z" fill="url(#xg)"/>
+      <line x1="${cx - 60}" y1="${t + lsl}" x2="${cx + 44}" y2="${t + lsl}" stroke="#ff6b5c" stroke-dasharray="4 4" opacity=".8"/>
+      <line x1="${cx + 52}" y1="${t + 2}" x2="${cx + 52}" y2="${t + d - 2}" stroke="#f5f5f0" marker-start="url(#xa)" marker-end="url(#xa)"/></g>
+      <text x="28" y="${t + lsl + 4}" fill="#ff6b5c" font-size="11">LSL depth 1.60</text>
+      <text x="${cx}" y="${t - 10}" fill="#f5f5f0" font-size="12.5" font-weight="600" text-anchor="middle">Outer ${r.outer.toFixed(2)} · Inner ${r.inner.toFixed(2)} mm</text>
+      <rect x="${cx + 66}" y="${t + d / 2 - 10}" width="64" height="20" fill="#232320"/>
+      <text x="${cx + 68}" y="${t + d / 2 + 5}" fill="#f5f5f0" font-size="13" font-weight="600">D ${r.depth.toFixed(2)}</text>`;
+  }
+  svg.innerHTML = hatch + body;
+}
+
+/* =========================================================
+   4) PROCESS WINDOW (canvas heat map)
+   ========================================================= */
+function drawPW() {
+  const cv = $('pw'), dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const W = 360, H = 270;
+  if (cv.width !== W * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
+  const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const P = PROC[procKey], s = state[procKey];
+  const pP = P.params[0], pV = P.params[1];
+  const L = 48, R = 12, T = 10, B = 36;
+  const x = v => L + (v - pV.min) / (pV.max - pV.min) * (W - L - R);
+  const y = p => T + (pP.max - p) / (pP.max - pP.min) * (H - T - B);
+  g.clearRect(0, 0, W, H); g.fillStyle = '#141412'; g.fillRect(0, 0, W, H);
+  const nx = 60, ny = 44, cw = (W - L - R) / nx, ch = (H - T - B) / ny;
+  for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) {
+    const v = pV.min + (i + 0.5) / nx * (pV.max - pV.min);
+    const p = pP.max - (j + 0.5) / ny * (pP.max - pP.min);
+    const q = Object.assign({}, s, { P: p, v });
+    g.fillStyle = P.pass(P.calc(q)) ? 'rgba(127,159,12,.75)' : '#2a2a26';
+    g.fillRect(L + i * cw, T + j * ch, cw + 0.5, ch + 0.5);
+  }
+  g.strokeStyle = 'rgba(10,10,10,.35)'; g.lineWidth = 1;
+  g.font = '11px "Noto Sans Thai", sans-serif'; g.fillStyle = '#9a9a95';
+  const ticks = (a, b, n) => Array.from({ length: n + 1 }, (_, i) => a + (b - a) * i / n);
+  ticks(pV.min, pV.max, 4).forEach((v, i, a) => { g.textAlign = i === a.length - 1 ? 'right' : 'center'; g.fillText(v.toFixed(pV.dp), i === a.length - 1 ? x(v) + 2 : x(v), H - B + 15); });
+  ticks(pP.min, pP.max, 4).forEach(p => { g.textAlign = 'right'; g.fillText(Math.round(p), L - 6, y(p) + 4); });
+  g.textAlign = 'center'; g.fillText(`${pV.label} (${pV.unit})`, L + (W - L - R) / 2, H - 4);
+  g.save(); g.translate(12, T + (H - T - B) / 2); g.rotate(-Math.PI / 2); g.fillText('Power (W)', 0, 0); g.restore();
+  // thesis optimum
+  g.strokeStyle = '#d7ff3d'; g.lineWidth = 2; g.beginPath(); g.arc(x(pV.opt), y(pP.opt), 9, 0, Math.PI * 2); g.stroke();
+  // current
+  g.fillStyle = '#f5f5f0'; g.strokeStyle = '#141412'; g.lineWidth = 2;
+  g.beginPath(); g.arc(x(s.v), y(s.P), 5.5, 0, Math.PI * 2); g.fill(); g.stroke();
+}
+
+/* =========================================================
+   5) 3D MACHINE (generic, built from primitives)
+   ========================================================= */
+const sim = (() => {
+  const view = $('view');
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.2;
+  view.prepend(renderer.domElement);
+  const labelLayer = document.createElement('div'); labelLayer.className = 'labels'; view.appendChild(labelLayer);
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x1c1d1b);
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x2a2a26, 1.0));
+  const key = new THREE.DirectionalLight(0xffffff, 2.0); key.position.set(3, 5, 4); scene.add(key);
+  const rim = new THREE.DirectionalLight(0xd7ff3d, 0.5); rim.position.set(-4, 3, -3); scene.add(rim);
+  const camera = new THREE.PerspectiveCamera(36, 1, 0.01, 100);
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true; controls.maxPolarAngle = Math.PI * 0.52; controls.minDistance = 0.5; controls.maxDistance = 12;
+  function resize() { const w = view.clientWidth, h = view.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+  new ResizeObserver(resize).observe(view); resize();
+
+  const std = (color, metalness, roughness, extra) => new THREE.MeshStandardMaterial(Object.assign({ color, metalness, roughness }, extra || {}));
+  const M = {
+    steel: std(0xc4c9ce, 0.7, 0.3), steel2: std(0x9aa0a6, 0.7, 0.38), alu: std(0xb9bec4, 0.55, 0.45),
+    frame: std(0x3a3b37, 0.3, 0.7), dark: std(0x222321, 0.4, 0.55), head: std(0x2b2c2a, 0.5, 0.4),
+    cab: std(0xd9dcdf, 0.15, 0.6), cabDark: std(0x2a2b29, 0.3, 0.5),
+    accent: std(0xd7ff3d, 0.2, 0.5), fiber: std(0xe6d23a, 0.1, 0.6), red: std(0xd8402f, 0.2, 0.5), rubber: std(0x151515, 0.0, 0.9),
+    glass: std(0x9fd4ff, 0.1, 0.05, { transparent: true, opacity: 0.35 }),
+    panel: std(0xbfd9e8, 0.0, 0.1, { transparent: true, opacity: 0.07, side: THREE.DoubleSide, depthWrite: false }),
+    mirror: std(0xffffff, 1, 0.05),
+    beam: new THREE.MeshBasicMaterial({ color: 0xd7ff3d, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false }),
+    beamGlow: new THREE.MeshBasicMaterial({ color: 0xd7ff3d, transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending, depthWrite: false }),
+  };
+  const box = (w, h, d, m, x = 0, y = 0, z = 0, p) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x, y, z); if (p) p.add(o); return o; };
+  const cyl = (rt, rb, h, m, x = 0, y = 0, z = 0, p, seg = 40) => { const o = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), m); o.position.set(x, y, z); if (p) p.add(o); return o; };
+  const tube = (pts, r, m, p) => { const o = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(a => new THREE.Vector3(...a))), 48, r, 10), m); if (p) p.add(o); return o; };
+
+  /* ---------- static cell: floor, table, enclosure, laser source, chiller, HMI ---------- */
+  const FLOOR = -0.9;
+  const grid = new THREE.GridHelper(12, 48, 0x3a3b37, 0x262724); grid.position.y = FLOOR; scene.add(grid);
+  const cell = new THREE.Group(); scene.add(cell);
+  box(2.6, 0.08, 1.7, M.frame, 0, -0.04, 0, cell);                         // table top
+  box(2.6, 0.012, 0.05, M.accent, 0, 0.002, 0.82, cell);                   // lime edge
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    box(0.08, 0.82, 0.08, M.dark, sx * 1.22, -0.49, sz * 0.77, cell);      // legs
+    cyl(0.05, 0.06, 0.03, M.rubber, sx * 1.22, FLOOR + 0.015, sz * 0.77, cell, 16);
+    box(0.06, 2.2, 0.06, M.dark, sx * 1.27, 1.1, sz * 0.82, cell);         // enclosure posts
+  }
+  box(2.5, 0.05, 1.6, M.dark, 0, -0.6, 0, cell);                           // lower shelf
+  box(0.5, 0.3, 0.5, M.cabDark, -0.7, -0.42, 0, cell);                     // servo amp box under table
+  box(2.6, 0.06, 0.06, M.dark, 0, 2.2, -0.82, cell); box(2.6, 0.06, 0.06, M.dark, 0, 2.2, 0.82, cell);
+  box(0.06, 0.06, 1.7, M.dark, -1.27, 2.2, 0, cell); box(0.06, 0.06, 1.7, M.dark, 1.27, 2.2, 0, cell);
+  box(2.5, 2.1, 0.01, M.panel, 0, 1.1, -0.82, cell);                       // laser-safe panels (back, sides)
+  box(0.01, 2.1, 1.6, M.panel, -1.27, 1.1, 0, cell); box(0.01, 2.1, 1.6, M.panel, 1.27, 1.1, 0, cell);
+  // signal tower
+  cyl(0.02, 0.02, 0.2, M.dark, 1.27, 2.33, -0.82, cell, 12);
+  const towerMat = [0xd8402f, 0xf5b942, 0x7fd36a].map(c => new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: 0.15, roughness: 0.4 }));
+  towerMat.forEach((m, i) => cyl(0.04, 0.04, 0.07, m, 1.27, 2.6 - i * 0.075, -0.82, cell, 16));
+  // fiber laser source (rack cabinet) + chiller, standing on the floor beside the cell
+  const src = new THREE.Group(); src.position.set(-2.15, FLOOR, -0.45); cell.add(src);
+  box(0.72, 1.5, 0.9, M.cab, 0, 0.78, 0, src);
+  box(0.72, 0.06, 0.9, M.cabDark, 0, 0.03, 0, src);
+  box(0.6, 0.62, 0.02, M.cabDark, 0, 1.13, 0.455, src);                    // front control panel
+  const srcLcd = box(0.26, 0.14, 0.01, new THREE.MeshStandardMaterial({ color: 0x0a0a0a, emissive: 0xd7ff3d, emissiveIntensity: 0.5 }), -0.1, 1.28, 0.47, src);
+  cyl(0.035, 0.035, 0.03, M.red, 0.19, 1.3, 0.475, src, 20).rotation.x = Math.PI / 2;      // e-stop
+  cyl(0.018, 0.018, 0.03, M.steel, 0.19, 1.16, 0.475, src, 16).rotation.x = Math.PI / 2;   // key switch
+  for (let i = 0; i < 3; i++) cyl(0.012, 0.012, 0.012, towerMat[2 - i], -0.2 + i * 0.06, 1.12, 0.47, src, 12).rotation.x = Math.PI / 2;
+  for (let i = 0; i < 7; i++) box(0.5, 0.012, 0.012, M.cabDark, 0, 0.3 + i * 0.045, 0.455, src);  // vent louvres
+  box(0.03, 0.5, 0.03, M.steel2, 0.3, 0.6, 0.47, src);                     // door handle
+  const chl = new THREE.Group(); chl.position.set(-2.15, FLOOR, 0.6); cell.add(chl);
+  box(0.66, 0.8, 0.6, M.cabDark, 0, 0.42, 0, chl);
+  for (let i = 0; i < 9; i++) box(0.5, 0.014, 0.012, M.frame, 0, 0.2 + i * 0.05, 0.305, chl);
+  cyl(0.16, 0.16, 0.02, M.frame, 0, 0.83, 0, chl, 24);                     // fan grille
+  tube([[-2.15, -0.1, 0.5], [-2.3, 0.2, 0.2], [-2.3, 0.4, -0.2], [-2.15, 0.5, -0.3]], 0.022, M.rubber, cell);  // coolant hoses
+  tube([[-2.05, -0.1, 0.5], [-2.0, 0.25, 0.2], [-2.0, 0.45, -0.15], [-2.05, 0.5, -0.3]], 0.022, M.rubber, cell);
+  // HMI pendant (GOT-style touch panel) with live canvas screen
+  const hmi = new THREE.Group(); hmi.position.set(1.05, 0, 0.62); cell.add(hmi);
+  cyl(0.025, 0.025, 0.95, M.dark, 0, 0.475, 0, hmi, 12);
+  const hmiHead = new THREE.Group(); hmiHead.position.set(0, 1.02, 0); hmiHead.rotation.set(-0.35, -0.45, 0); hmi.add(hmiHead);
+  box(0.46, 0.32, 0.05, M.cabDark, 0, 0, 0, hmiHead);
+  const hmiCv = document.createElement('canvas'); hmiCv.width = 384; hmiCv.height = 256;
+  const hmiTex = new THREE.CanvasTexture(hmiCv); hmiTex.colorSpace = THREE.SRGBColorSpace;
+  const hmiScreen = new THREE.Mesh(new THREE.PlaneGeometry(0.4, 0.26), new THREE.MeshBasicMaterial({ map: hmiTex }));
+  hmiScreen.position.z = 0.027; hmiHead.add(hmiScreen);
+  cyl(0.02, 0.02, 0.02, M.red, 0.19, -0.19, 0.0, hmiHead, 16).rotation.x = Math.PI / 2;
+
+  /* ---------- beam, spot, sparks, trail ---------- */
+  const beamGroup = new THREE.Group(); scene.add(beamGroup);
+  beamGroup.add(cyl(0.004, 0.012, 1, M.beam, 0, 0, 0, null, 12), cyl(0.012, 0.04, 1, M.beamGlow, 0, 0, 0, null, 16));
+  const spot = new THREE.Mesh(new THREE.SphereGeometry(0.018, 16, 12), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }));
+  const spotGlow = new THREE.Mesh(new THREE.SphereGeometry(0.07, 16, 12), new THREE.MeshBasicMaterial({ color: 0xd7ff3d, transparent: true, opacity: 0.25, blending: THREE.AdditiveBlending, depthWrite: false }));
+  scene.add(spot, spotGlow);
+  const spotLight = new THREE.PointLight(0xe8ff9a, 0, 2.0); scene.add(spotLight);
+  const TRAIL = 900; let trailIdx = 0, trailCount = 0;
+  const trailGeo = new THREE.BufferGeometry();
+  const trailPos = new Float32Array(TRAIL * 3), trailCol = new Float32Array(TRAIL * 3), trailBorn = new Float32Array(TRAIL);
+  trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPos, 3));
+  trailGeo.setAttribute('color', new THREE.BufferAttribute(trailCol, 3));
+  const trail = new THREE.Points(trailGeo, new THREE.PointsMaterial({ size: 0.009, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+  trail.frustumCulled = false;
+  const NS = 140; const sGeo = new THREE.BufferGeometry();
+  const sPos = new Float32Array(NS * 3).fill(-50), sVel = new Float32Array(NS * 3), sLife = new Float32Array(NS);
+  sGeo.setAttribute('position', new THREE.BufferAttribute(sPos, 3));
+  const sparks = new THREE.Points(sGeo, new THREE.PointsMaterial({ color: 0xfff3b0, size: 0.014, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
+  sparks.frustumCulled = false; scene.add(sparks);
+
+  /* ---------- process rigs ---------- */
+  let rig = null, part = null, spin = null, seam = null, seamAngles = null, weldT = null;
+  let seamR = 0, T = new THREE.Vector3(), headMove = null, headAxis = new THREE.Vector3(0, 1, 0), beamFrom = new THREE.Vector3(), mirrors = [], labels = [];
+
+  function addSeam(parent, r, y, tubeR) {
+    const N = 360;
+    const geo = new THREE.TorusGeometry(r, tubeR, 8, N);
+    geo.rotateX(Math.PI / 2); geo.scale(1, 0.45, 1); geo.translate(0, y, 0);
+    const pos = geo.attributes.position;
+    seamAngles = new Int16Array(pos.count);
+    for (let i = 0; i < pos.count; i++) { let a = Math.atan2(pos.getZ(i), pos.getX(i)); if (a < 0) a += Math.PI * 2; seamAngles[i] = Math.floor(a / (Math.PI * 2) * N) % N; }
+    geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(pos.count * 3), 3));
+    seam = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true, metalness: 0.5, roughness: 0.45 }));
+    seam.userData.N = N; weldT = new Float32Array(N).fill(-1);
+    parent.add(seam); parent.add(trail);
+    trailCount = 0; trailIdx = 0; trailGeo.setDrawRange(0, 0);
+  }
+  function servo(p, x, y, z, rotZ) { // small servo motor with lime end cap
+    const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.z = rotZ ? Math.PI / 2 : 0; if (!rotZ) g.rotation.x = Math.PI / 2; p.add(g);
+    cyl(0.04, 0.04, 0.16, M.dark, 0, 0, 0, g, 20); cyl(0.042, 0.042, 0.03, M.accent, 0, 0.095, 0, g, 20); return g;
+  }
+  function fumeArm(p, tip) { // extraction duct with hood near the weld
+    tube([[-1.15, 1.9, -0.7], [-0.9, 1.5, -0.55], [-0.6, tip.y + 0.45, -0.35], [tip.x - 0.22, tip.y + 0.2, tip.z - 0.2]], 0.045, M.rubber, p);
+    const hood = cyl(0.045, 0.09, 0.12, M.dark, tip.x - 0.17, tip.y + 0.15, tip.z - 0.16, p, 24);
+    hood.lookAt(tip.x, tip.y, tip.z); hood.rotateX(-Math.PI / 2);
+  }
+
+  function buildHID() {
+    rig = new THREE.Group(); scene.add(rig); labels = []; spin = null;
+    // XY stage
+    box(1.0, 0.05, 0.8, M.alu, 0, 0.025, 0, rig);
+    for (const z of [-0.26, 0.26]) box(0.92, 0.03, 0.045, M.steel, 0, 0.065, z, rig);
+    box(0.62, 0.04, 0.66, M.frame, 0, 0.1, 0, rig);
+    for (const x of [-0.2, 0.2]) box(0.045, 0.03, 0.6, M.steel, x, 0.135, 0, rig);
+    box(0.5, 0.035, 0.46, M.alu, 0, 0.167, 0, rig);
+    servo(rig, 0.56, 0.085, 0, true); servo(rig, 0, 0.125, 0.42, false);
+    cyl(0.012, 0.012, 0.9, M.steel, 0, 0.075, 0, rig, 10).rotation.z = Math.PI / 2;   // ball screw
+    // fixture nest + part (Housing cup with Inlet Disc on top)
+    cyl(0.2, 0.21, 0.05, M.dark, 0, 0.21, 0, rig);
+    for (let i = 0; i < 3; i++) { const a = i * Math.PI * 2 / 3 + 0.5; box(0.05, 0.07, 0.07, M.steel2, Math.cos(a) * 0.19, 0.27, Math.sin(a) * 0.19, rig).rotation.y = -a; }
+    part = new THREE.Group(); part.position.y = 0.235; rig.add(part);
+    cyl(0.17, 0.17, 0.3, M.steel, 0, 0.15, 0, part); cyl(0.19, 0.19, 0.025, M.steel2, 0, 0.0125, 0, part);
+    cyl(0.172, 0.172, 0.012, M.steel2, 0, 0.306, 0, part);                 // Inlet Disc
+    cyl(0.06, 0.06, 0.016, M.dark, 0, 0.308, 0, part);                     // centre opening
+    const lip = new THREE.Mesh(new THREE.TorusGeometry(0.066, 0.008, 8, 48), M.steel); lip.rotation.x = Math.PI / 2; lip.position.y = 0.314; part.add(lip);
+    seamR = 0.115; const yTop = 0.3125;
+    addSeam(part, seamR, yTop, 0.007);
+    T.set(seamR, 0.235 + yTop + 0.002, 0);
+    // column + Z axis
+    box(0.26, 2.0, 0.26, M.frame, 0, 1.0, -0.62, rig);
+    box(0.05, 1.2, 0.02, M.steel, -0.07, 1.25, -0.485, rig); box(0.05, 1.2, 0.02, M.steel, 0.07, 1.25, -0.485, rig);
+    servo(rig, 0, 2.08, -0.62, false).rotation.x = 0;
+    headMove = new THREE.Group(); rig.add(headMove); headAxis.set(0, 1, 0);
+    box(0.3, 0.36, 0.1, M.alu, 0, 1.3, -0.43, headMove);                   // Z carriage
+    box(0.2, 0.14, 0.24, M.alu, 0, 1.33, -0.3, headMove);                  // arm
+    // galvo scanner head (black box) with window showing the two mirrors
+    box(0.36, 0.3, 0.4, M.head, 0, 1.3, 0, headMove);
+    box(0.24, 0.16, 0.012, M.glass, 0, 1.31, 0.202, headMove);
+    const m1 = box(0.09, 0.06, 0.005, M.mirror, -0.05, 1.33, 0.15, headMove), m2 = box(0.06, 0.09, 0.005, M.mirror, 0.06, 1.29, 0.15, headMove);
+    cyl(0.02, 0.02, 0.09, M.accent, -0.13, 1.33, 0.15, headMove, 14).rotation.z = Math.PI / 2;
+    cyl(0.02, 0.02, 0.09, M.accent, 0.06, 1.38, 0.15, headMove, 14);
+    mirrors = [m1, m2];
+    for (let i = 0; i < 5; i++) box(0.3, 0.008, 0.012, M.frame, 0, 1.2 + i * 0.022, -0.201, headMove);   // cooling fins
+    cyl(0.05, 0.05, 0.26, M.steel2, 0.31, 1.3, 0, headMove, 24).rotation.z = Math.PI / 2;   // collimator
+    cyl(0.035, 0.05, 0.1, M.dark, 0.48, 1.3, 0, headMove, 24).rotation.z = Math.PI / 2;     // fiber connector
+    box(0.1, 0.12, 0.1, M.dark, -0.1, 1.51, -0.08, headMove); cyl(0.03, 0.03, 0.05, M.steel2, -0.1, 1.44, -0.08, headMove, 16); // coaxial camera
+    cyl(0.12, 0.1, 0.11, M.steel2, 0, 1.095, 0, headMove); cyl(0.085, 0.085, 0.006, M.glass, 0, 1.037, 0, headMove);         // F-theta lens
+    box(0.46, 0.014, 0.34, M.glass, 0, 0.93, 0, headMove);                 // cover glass
+    for (const [x, z] of [[-0.22, -0.16], [0.22, -0.16], [-0.22, 0.16], [0.22, 0.16]]) cyl(0.007, 0.007, 0.22, M.steel, x, 1.04, z, headMove, 8);
+    box(0.05, 0.04, 0.34, M.dark, -0.26, 0.915, 0, headMove);              // cross-jet air knife
+    tube([[-0.26, 0.93, -0.17], [-0.3, 1.1, -0.3], [-0.2, 1.3, -0.5]], 0.008, M.accent, headMove);
+    beamFrom.set(0, 1.034, 0);
+    // fiber: laser source -> collimator
+    tube([[-2.15, 0.62, -0.45], [-2.15, 1.5, -0.45], [-1.2, 2.25, -0.6], [0.3, 2.2, -0.5], [0.75, 1.75, -0.15], [0.56, 1.3, 0]], 0.016, M.fiber, rig);
+    // shielding gas nozzle + fume extraction
+    const gas = cyl(0.008, 0.012, 0.3, M.steel, T.x + 0.2, T.y + 0.1, 0.12, rig, 12); gas.lookAt(T); gas.rotateX(Math.PI / 2);
+    tube([[T.x + 0.33, T.y + 0.17, 0.2], [0.5, 0.3, 0.33], [0.5, 0.06, 0.36]], 0.007, M.accent, rig);
+    fumeArm(rig, T);
+    labels = [
+      ['Galvo scanner head', [0, 1.47, 0.2]], ['Collimator + fiber', [0.5, 1.36, 0]], ['F-theta lens', [0.13, 1.09, 0]],
+      ['Cover glass', [0.25, 0.93, 0.17]], ['Inlet Disc / Housing', [-0.18, 0.5, 0.1]], ['XY stage', [0.45, 0.14, 0.3]],
+      ['Z axis', [0, 1.95, -0.48]], ['Fiber laser source', [-2.15, 0.75, 0.05]], ['Chiller', [-2.15, 0.02, 0.95]], ['HMI', [1.05, 1.22, 0.62]],
+      ['Fume extraction', [-1.0, 1.7, -0.6]],
+    ];
+  }
+
+  function buildDB() {
+    rig = new THREE.Group(); scene.add(rig); labels = [];
+    // rotary table
+    box(0.9, 0.16, 0.9, M.alu, 0, 0.08, 0, rig);
+    servo(rig, -0.56, 0.08, 0, true);
+    cyl(0.3, 0.33, 0.04, M.dark, 0, 0.18, 0, rig);
+    spin = new THREE.Group(); spin.position.y = 0.2; rig.add(spin);
+    cyl(0.5, 0.5, 0.04, M.steel2, 0, 0.02, 0, spin, 64);
+    for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; cyl(0.012, 0.012, 0.042, M.dark, Math.cos(a) * 0.42, 0.021, Math.sin(a) * 0.42, spin, 10); }
+    box(0.03, 0.006, 0.12, M.accent, 0, 0.043, 0.42, spin);
+    cyl(0.2, 0.22, 0.09, M.dark, 0, 0.085, 0, spin);
+    for (let i = 0; i < 3; i++) { const a = i * Math.PI * 2 / 3; box(0.07, 0.08, 0.1, M.steel2, Math.cos(a) * 0.17, 0.16, Math.sin(a) * 0.17, spin).rotation.y = -a; }
+    part = new THREE.Group(); part.position.y = 0.13; spin.add(part);
+    cyl(0.15, 0.15, 0.68, M.steel, 0, 0.34, 0, part);                      // Bottle
+    cyl(0.12, 0.15, 0.05, M.steel, 0, 0.705, 0, part);                     // shoulder
+    cyl(0.1, 0.1, 0.17, M.steel2, 0, 0.815, 0, part);                      // Diffuser
+    cyl(0.085, 0.1, 0.02, M.steel2, 0, 0.91, 0, part);
+    for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; const h = cyl(0.014, 0.014, 0.012, M.dark, Math.cos(a) * 0.1, 0.84, Math.sin(a) * 0.1, part, 10); h.rotation.z = Math.PI / 2; h.rotation.y = -a; }
+    seamR = 0.108; const ySeam = 0.732;
+    addSeam(part, seamR, ySeam, 0.009);
+    T.set(seamR, 0.2 + 0.13 + ySeam + 0.003, 0);
+    // wobble head, tilted 16 deg (theta axis) about the weld point
+    const th = 16 * Math.PI / 180;
+    headAxis.set(Math.sin(th), Math.cos(th), 0);
+    const tilt = new THREE.Group(); tilt.position.copy(T); tilt.rotation.z = -th; rig.add(tilt);
+    headMove = new THREE.Group(); tilt.add(headMove);
+    cyl(0.07, 0.022, 0.2, M.steel2, 0, 0.32, 0, headMove, 32);             // nozzle cone
+    cyl(0.075, 0.075, 0.03, M.accent, 0, 0.435, 0, headMove, 32);
+    box(0.17, 0.2, 0.17, M.head, 0, 0.55, 0, headMove);                    // focus module
+    box(0.19, 0.012, 0.19, M.steel2, 0, 0.655, 0, headMove);
+    box(0.24, 0.2, 0.2, M.head, 0, 0.76, 0, headMove);                     // wobble module
+    cyl(0.03, 0.03, 0.1, M.dark, 0, 0.78, 0.15, headMove, 16).rotation.x = Math.PI / 2; cyl(0.032, 0.032, 0.02, M.accent, 0, 0.78, 0.205, headMove, 16).rotation.x = Math.PI / 2;
+    cyl(0.03, 0.03, 0.1, M.dark, -0.17, 0.74, 0, headMove, 16).rotation.z = Math.PI / 2; cyl(0.032, 0.032, 0.02, M.accent, -0.225, 0.74, 0, headMove, 16).rotation.z = Math.PI / 2;
+    box(0.26, 0.012, 0.22, M.steel2, 0, 0.865, 0, headMove);
+    box(0.15, 0.26, 0.15, M.head, 0, 1.0, 0, headMove);                    // collimator module
+    cyl(0.035, 0.035, 0.18, M.steel2, 0, 1.22, 0, headMove, 20); cyl(0.045, 0.045, 0.04, M.dark, 0, 1.15, 0, headMove, 20);  // fiber connector
+    box(0.1, 0.1, 0.16, M.dark, 0.17, 0.98, 0, headMove); cyl(0.028, 0.028, 0.05, M.steel2, 0.17, 0.98, 0.1, headMove, 16).rotation.x = Math.PI / 2; // camera port
+    tube([[0.09, 0.5, 0.09], [0.11, 0.38, 0.1], [0.05, 0.25, 0.05]], 0.006, M.accent, headMove);   // coaxial gas line
+    box(0.14, 0.2, 0.3, M.alu, 0, 0.74, -0.25, headMove);                  // mounting bracket to slide
+    beamFrom.set(0, 0.22, 0);
+    // column + arm holding the tilted head
+    const hx = T.x + 0.74 * headAxis.x, hy = T.y + 0.74 * headAxis.y;
+    box(0.26, 2.05, 0.26, M.frame, hx, 1.02, -0.62, rig);
+    box(0.3, 0.5, 0.1, M.alu, hx, hy, -0.44, rig);
+    servo(rig, hx, 2.1, -0.62, false).rotation.x = 0;
+    box(0.05, 1.1, 0.02, M.steel, hx - 0.07, 1.4, -0.485, rig); box(0.05, 1.1, 0.02, M.steel, hx + 0.07, 1.4, -0.485, rig);
+    // fiber: laser source -> head top
+    const top = new THREE.Vector3(0, 1.32, 0).applyAxisAngle(new THREE.Vector3(0, 0, 1), -th).add(T);
+    tube([[-2.15, 0.62, -0.45], [-2.15, 1.5, -0.45], [-1.2, 2.3, -0.5], [0.2, 2.45, -0.2], [top.x + 0.12, top.y + 0.3, 0], [top.x, top.y, 0]], 0.016, M.fiber, rig);
+    fumeArm(rig, T);
+    labels = [
+      ['Wobble head (เอียง 16°)', [hx + 0.2, hy + 0.1, 0.12]], ['Collimator + fiber', [top.x + 0.1, top.y, 0]], ['Wobble module', [hx - 0.2, hy + 0.05, 0.12]],
+      ['Diffuser', [-0.14, 1.2, 0.05]], ['Bottle', [-0.2, 0.7, 0.1]], ['Rotary table', [0.4, 0.26, 0.35]],
+      ['Fiber laser source', [-2.15, 0.75, 0.05]], ['Chiller', [-2.15, 0.02, 0.95]], ['HMI', [1.05, 1.22, 0.62]], ['Fume extraction', [-1.0, 1.7, -0.6]],
+    ];
+  }
+
+  function build(k) {
+    if (rig) { scene.remove(rig); rig.traverse(o => { if (o.geometry && o !== trail) o.geometry.dispose(); }); }
+    (k === 'hid' ? buildHID : buildDB)();
+    labelLayer.innerHTML = labels.map(l => `<span>${l[0]}</span>`).join('');
+    labels.forEach((l, i) => { l[2] = new THREE.Vector3(...l[1]); l[3] = labelLayer.children[i]; });
+    setCam('overview');
+  }
+
+  /* ---------- runtime ---------- */
+  let running = false, angle = 0, prevLocal = 0, welded = 0, params = null, result = null, passOK = true, kind = null, showLabels = true;
+  const clock = new THREE.Clock(); let tNow = 0;
+  const cBase = new THREE.Color(0x6b7075), cHot = new THREE.Color(0xffffff), cGlow = new THREE.Color(0xd7ff3d), cBead = new THREE.Color(0xd9ddc8), cBad = new THREE.Color(0xff6b5c), tmpC = new THREE.Color();
+
+  function drawHMI() {
+    const g = hmiCv.getContext('2d'), P = PROC[kind];
+    g.fillStyle = '#0a0a0a'; g.fillRect(0, 0, 384, 256);
+    g.fillStyle = '#d7ff3d'; g.fillRect(0, 0, 384, 40); g.fillStyle = '#0a0a0a'; g.font = 'bold 20px sans-serif'; g.fillText('LASER WELD  ' + (kind === 'hid' ? 'H&ID' : 'D&B'), 12, 27);
+    g.font = '18px sans-serif';
+    P.params.forEach((p, i) => { g.fillStyle = '#9a9a95'; g.fillText(p.label, 14, 72 + i * 30); g.fillStyle = '#f5f5f0'; g.textAlign = 'right'; g.fillText(params[p.k].toFixed(p.dp) + ' ' + p.unit, 370, 72 + i * 30); g.textAlign = 'left'; });
+    g.fillStyle = running ? '#d7ff3d' : (passOK ? '#7fd36a' : '#ff6b5c'); g.fillRect(14, 206, 356, 36);
+    g.fillStyle = '#0a0a0a'; g.font = 'bold 18px sans-serif'; g.fillText(running ? 'LASER ON  ' + Math.round(welded * 100) + '%' : (passOK ? 'READY  -  PARAM OK' : 'PARAM NG'), 24, 230);
+    hmiTex.needsUpdate = true;
+  }
+  function setParams(k, p, r, ok) {
+    params = p; result = r; passOK = ok;
+    if (k !== kind) { kind = k; build(k); resetWeld(); }
+    const P = PROC[kind].params;
+    const zOff = (p.Z - P[2].opt) * 0.12;                                  // focus Z moves the head along its axis
+    if (kind === 'hid') headMove.position.y = zOff; else headMove.position.y = zOff;
+    updateHud(); drawHMI();
+  }
+  function resetWeld() { if (weldT) weldT.fill(-1); welded = 0; trailCount = 0; trailGeo.setDrawRange(0, 0); }
+  function omega() { return 1.1 * (params.v / PROC[kind].params[1].opt); }
+  function markArc(a0, a1) {
+    const N = seam.userData.N, step = Math.PI * 2 / N, n = Math.ceil(Math.abs(a1 - a0) / step) + 1;
+    for (let i = 0; i <= n; i++) {
+      let a = a0 + (a1 - a0) * i / n; a %= Math.PI * 2; if (a < 0) a += Math.PI * 2;
+      const k = Math.floor(a / step) % N; if (weldT[k] < 0) welded += 1 / N; weldT[k] = tNow;
+    }
+  }
+  function paintSeam() {
+    if (!seam) return;
+    const col = seam.geometry.attributes.color;
+    for (let i = 0; i < col.count; i++) {
+      const t0 = weldT[seamAngles[i]];
+      if (t0 < 0) tmpC.copy(cBase);
+      else { const age = tNow - t0;
+        if (age < 0.12) tmpC.copy(cHot);
+        else if (age < 1.4) tmpC.copy(cHot).lerp(cGlow, Math.min(1, (age - 0.12) / 0.4)).lerp(passOK ? cBead : cBad, Math.max(0, (age - 0.5) / 0.9));
+        else tmpC.copy(passOK ? cBead : cBad); }
+      col.setXYZ(i, tmpC.r, tmpC.g, tmpC.b);
+    }
+    col.needsUpdate = true;
+  }
+  function updateHud() {
+    const P = PROC[kind];
+    $('hud').innerHTML = `${P.head}<br>` + P.params.map(p => `${p.label} <b>${params[p.k].toFixed(p.dp)}</b> ${p.unit}`).join('<br>') + `<br>แนวเชื่อม <b>${Math.round(Math.min(1, welded) * 100)}%</b>`;
+  }
+  const v3 = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0), target = new THREE.Vector3(), from = new THREE.Vector3(), lp = new THREE.Vector3(), pv = new THREE.Vector3();
+  function placeBeam(a, b) {
+    const dir = v3.copy(b).sub(a), len = dir.length();
+    beamGroup.position.copy(a).addScaledVector(dir, 0.5);
+    beamGroup.quaternion.setFromUnitVectors(up, dir.normalize());
+    beamGroup.scale.set(1, len, 1);
+  }
+  let hmiTick = 0;
+  function frame() {
+    const dt = Math.min(clock.getDelta(), 0.05); tNow += dt;
+    controls.update();
+    if (!rig || !params) { renderer.render(scene, camera); return; }
+    const on = running;
+    if (on) {
+      const a0 = angle; angle += omega() * dt;
+      if (kind === 'hid') markArc(a0, angle);                 // beam scans the circle, part is fixed
+      else { spin.rotation.y = -angle; markArc(-a0, -angle); } // part rotates under a fixed, wobbling beam
+      if (welded >= 1) { running = false; welded = 1; $('btnRun').textContent = '▶ เชื่อมอีกรอบ'; drawHMI(); }
+    }
+    // beam source / target
+    headMove.updateWorldMatrix(true, false);
+    from.copy(beamFrom).applyMatrix4(headMove.matrixWorld);
+    if (kind === 'hid') {
+      target.set(Math.cos(angle) * seamR, T.y, Math.sin(angle) * seamR);
+      mirrors[0].rotation.y = Math.cos(angle) * 0.35; mirrors[1].rotation.x = Math.sin(angle) * 0.35;
+    } else {
+      const ph = tNow * 30, wob = 0.014, dy = (params.Y - 191.0) * 0.06;
+      target.set(T.x + dy + Math.cos(ph) * wob, T.y, Math.sin(ph) * wob);
+    }
+    placeBeam(from, target);
+    beamGroup.visible = spot.visible = spotGlow.visible = on;
+    spot.position.copy(target); spotGlow.position.copy(target); spotLight.position.copy(target).y += 0.03;
+    spotLight.intensity = on ? 1.6 : 0;
+    spotGlow.scale.setScalar(0.85 + Math.random() * 0.3);
+    towerMat[2].emissiveIntensity = on ? 0.1 : 1.2; towerMat[1].emissiveIntensity = on ? 1.4 : 0.1; towerMat[0].emissiveIntensity = (!passOK && !on) ? 1.2 : 0.1;
+    srcLcd.material.emissiveIntensity = on ? 1.2 : 0.4;
+    if (on) {
+      part.updateWorldMatrix(true, false);
+      lp.copy(target); part.worldToLocal(lp);
+      trailPos[trailIdx * 3] = lp.x; trailPos[trailIdx * 3 + 1] = lp.y + 0.004; trailPos[trailIdx * 3 + 2] = lp.z; trailBorn[trailIdx] = tNow;
+      trailIdx = (trailIdx + 1) % TRAIL; trailCount = Math.min(TRAIL, trailCount + 1);
+      trailGeo.setDrawRange(0, trailCount); trailGeo.attributes.position.needsUpdate = true;
+      if ((hmiTick += dt) > 0.25) { hmiTick = 0; drawHMI(); updateHud(); }
+    }
+    for (let i = 0; i < trailCount; i++) { const f = Math.max(0.1, 1 - (tNow - trailBorn[i]) / 2.5); trailCol[i * 3] = 0.84 * f; trailCol[i * 3 + 1] = f; trailCol[i * 3 + 2] = 0.24 * f; }
+    trailGeo.attributes.color.needsUpdate = true;
+    for (let i = 0; i < NS; i++) {
+      if (sLife[i] <= 0) {
+        if (!on || Math.random() > 0.3) { sPos[i * 3 + 1] = -50; continue; }
+        sLife[i] = 0.2 + Math.random() * 0.4;
+        sPos[i * 3] = target.x; sPos[i * 3 + 1] = target.y; sPos[i * 3 + 2] = target.z;
+        sVel[i * 3] = (Math.random() - 0.5) * 1.0; sVel[i * 3 + 1] = 0.5 + Math.random() * 0.9; sVel[i * 3 + 2] = (Math.random() - 0.5) * 1.0;
+      } else { sLife[i] -= dt; sVel[i * 3 + 1] -= 4 * dt; sPos[i * 3] += sVel[i * 3] * dt; sPos[i * 3 + 1] += sVel[i * 3 + 1] * dt; sPos[i * 3 + 2] += sVel[i * 3 + 2] * dt; }
+    }
+    sGeo.attributes.position.needsUpdate = true;
+    paintSeam();
+    renderer.render(scene, camera);
+    // component labels
+    const w = view.clientWidth, h = view.clientHeight;
+    for (const l of labels) {
+      const el = l[3]; if (!el) continue;
+      pv.copy(l[2]).project(camera);
+      const vis = showLabels && pv.z < 1 && Math.abs(pv.x) < 1 && Math.abs(pv.y) < 1;
+      el.style.display = vis ? '' : 'none';
+      if (vis) el.style.transform = `translate(-50%,-50%) translate(${(pv.x * 0.5 + 0.5) * w}px,${(-pv.y * 0.5 + 0.5) * h}px)`;
+    }
+  }
+  let camMode = 'overview';
+  function setCam(m) {
+    camMode = m;
+    const narrow = view.clientWidth < 520;
+    if (m === 'overview') { camera.position.set(narrow ? 2.9 : 2.1, 1.8, narrow ? 4.6 : 3.3); controls.target.set(-0.25, 0.8, 0); }
+    else { camera.position.set(T.x + 0.75, T.y + 0.5, 1.05); controls.target.set(T.x * 0.5, T.y + 0.12, 0); }
+    controls.update();
+  }
+  renderer.setAnimationLoop(frame);
+  $('loading').style.display = 'none';
+  return {
+    setParams,
+    run() { if (welded >= 1) resetWeld(); running = !running; drawHMI(); return running; },
+    stop() { running = false; },
+    clear() { running = false; resetWeld(); drawHMI(); updateHud(); },
+    toggleCam() { setCam(camMode === 'overview' ? 'close' : 'overview'); return camMode; },
+    toggleLabels() { showLabels = !showLabels; return showLabels; },
+  };
+})();
+
+/* =========================================================
+   6) WIRING
+   ========================================================= */
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  procKey = t.dataset.proc;
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x === t));
+  sim.stop(); $('btnRun').textContent = '▶ เริ่มเชื่อม'; $('btnCam').textContent = 'มุมกล้อง: ภาพรวม';
+  buildControls(); update();
+}));
+$('btnRun').addEventListener('click', () => { const r = sim.run(); $('btnRun').textContent = r ? '⏸ หยุด' : '▶ เริ่มเชื่อมต่อ'; });
+$('btnClear').addEventListener('click', () => { sim.clear(); $('btnRun').textContent = '▶ เริ่มเชื่อม'; update(); });
+$('btnOpt').addEventListener('click', () => { PROC[procKey].params.forEach(p => state[procKey][p.k] = p.opt); update(); });
+$('btnCam').addEventListener('click', () => { const m = sim.toggleCam(); $('btnCam').textContent = 'มุมกล้อง: ' + (m === 'overview' ? 'ภาพรวม' : 'ใกล้หัวเชื่อม'); });
+
+$('btnLab').addEventListener('click', () => { $('btnLab').textContent = 'ป้ายชื่อ: ' + (sim.toggleLabels() ? 'เปิด' : 'ปิด'); });
+
+buildControls(); update();
+if (location.hash === '#run' || location.hash === '#run-db') { if (location.hash === '#run-db') document.querySelector('.tab[data-proc="db"]').click(); $('btnRun').click(); }
+</script>
+</body>
+</html>

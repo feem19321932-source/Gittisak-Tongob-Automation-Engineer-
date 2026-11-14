@@ -13,6 +13,9 @@ const content = {
     proj2Eyebrow: 'MY DESIGN · MECHANICAL DESIGN',
     proj2Desc: 'ออกแบบ Roller Conveyor 3 แถว (1650 × 700 mm) พร้อมถาดรองน้ำมันใต้ชุดลูกกลิ้ง การ์ดป้องกัน และ Stopper ออกแบบด้วย Fusion 360 พร้อม Assembly Drawing ครบชุด — ดูโมเดล 3D แบบหมุนได้และซ่อน/แสดงแต่ละส่วน',
     proj2Cta: 'เปิดดูโมเดล 3D →',
+    proj3Eyebrow: "SENIOR PROJECT · BACHELOR'S THESIS · 2025",
+    proj3Desc: 'ประเมินความสามารถกระบวนการเชื่อมเลเซอร์ Housing & Inlet Disc และ Diffuser & Bottle ของ Hybrid Inflator LE3-120R ที่ Daicel Safety Systems (Thailand) หาค่าพารามิเตอร์ที่เหมาะสมผ่าน Focus Check → Rough/Detail MAP → Soundness Test จนค่า Cpk ทุกจุดวัดผ่านเกณฑ์ ≥ 1.67',
+    proj3Cta: 'อ่านสรุปโปรเจกต์ →',
     navCerts: 'Certifications',
     navBack: '← Back Home',
     navContact: 'Contact Me',
@@ -60,6 +63,9 @@ const content = {
     proj2Eyebrow: 'MY DESIGN · MECHANICAL DESIGN',
     proj2Desc: 'Designed a 3-lane roller conveyor (1650 × 700 mm) with an oil tray beneath the rollers, a safety guard and a stopper — modeled in Fusion 360 with a full assembly drawing set. Explore the interactive 3D model and toggle each part.',
     proj2Cta: 'Open 3D Model →',
+    proj3Eyebrow: "SENIOR PROJECT · BACHELOR'S THESIS · 2025",
+    proj3Desc: 'Evaluated the laser welding process capability for Housing & Inlet Disc and Diffuser & Bottle on the LE3-120R hybrid inflator line at Daicel Safety Systems (Thailand). Tuned parameters through Focus Check → Rough/Detail MAP → Soundness Test until every measured point reached Cpk ≥ 1.67.',
+    proj3Cta: 'Read Project Summary →',
     navCerts: 'Certifications',
     navBack: '← Back Home',
     navContact: 'Contact Me',
@@ -308,6 +314,9 @@ function updateContent() {
   document.getElementById('proj2-eyebrow').textContent = c.proj2Eyebrow;
   document.getElementById('proj2-desc').textContent = c.proj2Desc;
   document.getElementById('proj2-cta').textContent = c.proj2Cta;
+  document.getElementById('proj3-eyebrow').textContent = c.proj3Eyebrow;
+  document.getElementById('proj3-desc').textContent = c.proj3Desc;
+  document.getElementById('proj3-cta').textContent = c.proj3Cta;
   document.querySelector('#work .h2').textContent = c.eduTitle;
   document.querySelector('.section-head-row .h2').textContent = c.featuredCerts;
   document.querySelector('.section-head-row .btn-outline-pill').textContent = c.viewAll;
