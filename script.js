@@ -10,6 +10,9 @@ const content = {
     projEyebrow: 'MY DESIGN · MACHINE DESIGN',
     projDesc: 'ออกแบบเครื่องประกอบท่อเข้ากับเซ็นเตอร์ พร้อมภาพจำลอง 3D จากโมเดล CAD จริง แสดงลำดับการทำงานของ Robot, Jig, Cylinder และ Sensor ตาม Time chart และวิเคราะห์รอบเวลาด้วย Monte Carlo',
     projCta: 'เปิดดู 3D Simulation →',
+    proj2Eyebrow: 'MY DESIGN · MECHANICAL DESIGN',
+    proj2Desc: 'ออกแบบ Roller Conveyor 3 แถว (1650 × 700 mm) พร้อมถาดรองน้ำมันใต้ชุดลูกกลิ้ง การ์ดป้องกัน และ Stopper ออกแบบด้วย Fusion 360 พร้อม Assembly Drawing ครบชุด — ดูโมเดล 3D แบบหมุนได้และซ่อน/แสดงแต่ละส่วน',
+    proj2Cta: 'เปิดดูโมเดล 3D →',
     navCerts: 'Certifications',
     navBack: '← Back Home',
     navContact: 'Contact Me',
@@ -54,6 +57,9 @@ const content = {
     projEyebrow: 'MY DESIGN · MACHINE DESIGN',
     projDesc: 'Designed a machine that assembles hoses onto centers, with an interactive 3D simulation built from the real CAD model — showing the Robot, Jig, Cylinder and Sensor sequence from the time chart, plus Monte Carlo cycle-time analysis.',
     projCta: 'Open 3D Simulation →',
+    proj2Eyebrow: 'MY DESIGN · MECHANICAL DESIGN',
+    proj2Desc: 'Designed a 3-lane roller conveyor (1650 × 700 mm) with an oil tray beneath the rollers, a safety guard and a stopper — modeled in Fusion 360 with a full assembly drawing set. Explore the interactive 3D model and toggle each part.',
+    proj2Cta: 'Open 3D Model →',
     navCerts: 'Certifications',
     navBack: '← Back Home',
     navContact: 'Contact Me',
@@ -299,6 +305,9 @@ function updateContent() {
   document.getElementById('proj-eyebrow').textContent = c.projEyebrow;
   document.getElementById('proj-desc').textContent = c.projDesc;
   document.getElementById('proj-cta').textContent = c.projCta;
+  document.getElementById('proj2-eyebrow').textContent = c.proj2Eyebrow;
+  document.getElementById('proj2-desc').textContent = c.proj2Desc;
+  document.getElementById('proj2-cta').textContent = c.proj2Cta;
   document.querySelector('#work .h2').textContent = c.eduTitle;
   document.querySelector('.section-head-row .h2').textContent = c.featuredCerts;
   document.querySelector('.section-head-row .btn-outline-pill').textContent = c.viewAll;

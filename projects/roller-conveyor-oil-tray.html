@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roller Conveyor with Oil Tray — Gittisak Tongob</title>
+<meta name="description" content="Roller Conveyor with Oil Tray — โมเดล 3D แบบ interactive ออกแบบโดย กิตติศักดิ์ ตองอบ">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#0a0a0a; --card:#141412; --card2:#1b1b18; --ink:#f5f5f0; --muted:#9a9a95; --muted2:#c9c7c2; --line:#2a2a26; --line2:#333330; --lime:#d7ff3d; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:var(--bg); color:var(--ink); font-family:'Noto Sans Thai','Inter',sans-serif; font-size:14px; -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+  ::selection { background:var(--lime); color:var(--bg); }
+  a { color:var(--lime); }
+  .topnav { position:sticky; top:0; z-index:50; background:rgba(10,10,10,.9); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); }
+  .topnav-in { max-width:1400px; margin:0 auto; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+  .logo { display:flex; align-items:center; gap:10px; color:var(--ink); text-decoration:none; font-family:'Source Serif 4',serif; font-weight:700; font-size:16px; }
+  .logo i { width:14px; height:14px; background:var(--lime); border-radius:50%; display:inline-block; }
+  .back { color:var(--ink); text-decoration:none; border:1px solid var(--line2); padding:9px 18px; border-radius:999px; font-size:13px; font-weight:600; transition:all .2s; white-space:nowrap; }
+  .back:hover { border-color:var(--lime); color:var(--lime); }
+  header { max-width:1400px; margin:0 auto; padding:40px 24px 8px; }
+  .eyebrow { color:var(--lime); font-size:12px; letter-spacing:1.5px; font-weight:600; margin-bottom:10px; }
+  header h1 { margin:0; font-family:'Source Serif 4','Noto Sans Thai',serif; font-size:40px; line-height:1.2; }
+  header .sub { font-size:15px; color:var(--muted2); margin-top:12px; line-height:1.7; max-width:820px; }
+  .tags { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+  .tags span { border:1px solid var(--line2); border-radius:999px; padding:6px 14px; font-size:12px; }
+  .wrap { max-width:1400px; margin:0 auto; display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:16px; padding:20px 24px 60px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:16px 18px; min-width:0; }
+  .card h2 { font-family:'Source Serif 4','Noto Sans Thai',serif; font-size:17px; margin:0 0 12px; }
+  #view { width:100%; height:620px; position:relative; border-radius:12px; overflow:hidden; background:#1c1d1b; touch-action:none; }
+  #view canvas { display:block; width:100%; height:100%; }
+  #loading { position:absolute; inset:0; display:flex; flex-direction:column; gap:12px; align-items:center; justify-content:center; color:var(--lime); background:rgba(10,10,10,.85); text-align:center; padding:20px; }
+  #loading .barw { width:220px; height:6px; background:var(--line2); border-radius:999px; overflow:hidden; }
+  #loading .bar { width:0; height:100%; background:var(--lime); transition:width .2s; }
+  .hint { position:absolute; left:12px; bottom:12px; background:rgba(10,10,10,.8); border:1px solid var(--line2); border-radius:10px; padding:6px 10px; font-size:12px; color:var(--muted2); pointer-events:none; }
+  .row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+  button { background:transparent; color:var(--ink); border:1px solid var(--line2); border-radius:999px; padding:7px 14px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; transition:all .2s; }
+  button:hover { border-color:var(--lime); color:var(--lime); }
+  button.on { background:var(--lime); color:var(--bg); border-color:var(--lime); }
+  .lbl { font-size:12px; color:var(--muted); margin-right:2px; }
+  .parts { display:flex; flex-direction:column; gap:6px; }
+  .part { display:flex; align-items:center; gap:10px; padding:9px 10px; border:1px solid var(--line); border-radius:12px; cursor:pointer; user-select:none; transition:all .2s; }
+  .part:hover { border-color:var(--line2); background:var(--card2); }
+  .part.off { opacity:.4; }
+  .part i { width:14px; height:14px; border-radius:4px; flex-shrink:0; }
+  .part .n { flex:1; font-size:13px; }
+  .part .c { font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .specs { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:4px; }
+  .spec { background:var(--card2); border:1px solid var(--line); border-radius:12px; padding:10px 12px; }
+  .spec .v { font-family:'Source Serif 4',serif; font-size:20px; font-weight:700; color:var(--lime); }
+  .spec .l { font-size:11px; color:var(--muted); margin-top:2px; }
+  .spec.wide { grid-column:1 / -1; }
+  .note { font-size:12px; color:var(--muted); line-height:1.6; margin-top:12px; }
+  .btn-pill { display:inline-block; background:var(--lime); color:var(--bg); text-decoration:none; padding:11px 20px; border-radius:999px; font-weight:600; font-size:14px; transition:all .3s; }
+  .btn-pill:hover { color:var(--bg); transform:translateY(-2px); box-shadow:0 8px 24px rgba(215,255,61,.3); }
+  .side { display:flex; flex-direction:column; gap:16px; }
+  .footer { text-align:center; padding:26px; color:#5a5a55; font-size:13px; border-top:1px solid var(--line); }
+  @media (max-width: 960px) {
+    .wrap { grid-template-columns:1fr; }
+    #view { height:460px; }
+  }
+  @media (max-width: 768px) {
+    .topnav-in { padding:12px 16px; }
+    .logo { font-size:13px; }
+    .back { padding:8px 12px; font-size:12px; }
+    header { padding:28px 16px 4px; }
+    header h1 { font-size:28px; }
+    header .sub { font-size:14px; }
+    .wrap { padding:16px 16px 40px; gap:14px; }
+    .card { padding:14px; }
+    #view { height:380px; }
+  }
+</style>
+</head>
+<body>
+<nav class="topnav"><div class="topnav-in">
+  <a class="logo" href="../index.html"><i></i>GITTISAK TONGOB</a>
+  <a class="back" href="../index.html#projects">← Back to Resume</a>
+</div></nav>
+
+<header>
+  <div class="eyebrow">PROJECT · MECHANICAL DESIGN · 3D MODEL</div>
+  <h1>Roller Conveyor with Oil Tray</h1>
+  <div class="sub">ออกแบบ Roller Conveyor พร้อมถาดรองน้ำมัน (Oil Tray) ใต้ชุดลูกกลิ้ง ประกอบด้วยโครงเหล็กรางตัว C/L ลูกกลิ้ง Ø50 การ์ดป้องกัน และ Stopper — โมเดล 3D จากไฟล์ CAD จริง หมุน ซูม และซ่อน/แสดงแต่ละส่วนได้</div>
+  <div class="tags"><span>Mechanical Design</span><span>Fusion 360</span><span>Roller Conveyor</span><span>Sheet Metal</span><span>Assembly Drawing</span></div>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <h2>โมเดล 3D</h2>
+    <div id="view">
+      <div id="loading"><div>กำลังโหลดโมเดล 3D…</div><div class="barw"><div class="bar" id="bar"></div></div><div id="pct" style="font-size:12px;color:#9a9a95">0%</div></div>
+      <div class="hint">ลาก = หมุน · คลิกขวา/สองนิ้ว = เลื่อน · ล้อเมาส์/ถ่างนิ้ว = ซูม</div>
+    </div>
+    <div class="row">
+      <span class="lbl">มุมมอง</span>
+      <button data-view="iso" class="on">3D</button>
+      <button data-view="front">ด้านหน้า</button>
+      <button data-view="side">ด้านข้าง</button>
+      <button data-view="top">ด้านบน</button>
+    </div>
+    <div class="row">
+      <button id="btnSpin">⟳ หมุนอัตโนมัติ</button>
+      <button id="btnTray">✦ ไฮไลต์ Oil Tray</button>
+      <button id="btnXray">โปร่งใส</button>
+    </div>
+  </div>
+
+  <div class="side">
+    <div class="card">
+      <h2>ชิ้นส่วน</h2>
+      <div class="parts" id="parts"></div>
+      <div class="note">คลิกเพื่อซ่อน/แสดงแต่ละส่วน</div>
+    </div>
+    <div class="card">
+      <h2>ข้อมูลโมเดล</h2>
+      <div class="specs">
+        <div class="spec wide"><div class="v">1700 × 743</div><div class="l">Oil Tray (mm) · ขอบสูง 47 mm · เหล็ก</div></div>
+        <div class="spec wide"><div class="v">1650 × 700</div><div class="l">Roller Conveyor (mm) · 3 แถว</div></div>
+        <div class="spec"><div class="v">1300</div><div class="l">การ์ด กว้าง × สูง (mm)</div></div>
+        <div class="spec"><div class="v">45</div><div class="l">ลูกกลิ้ง Ø50</div></div>
+      </div>
+      <div class="note">ขนาดจาก Assembly Drawing · ออกแบบด้วย Fusion 360</div>
+      <div class="row" style="margin-top:16px">
+        <a class="btn-pill" href="roller-conveyor-oil-tray-drawing.pdf" target="_blank" rel="noopener">ดู Drawing (PDF, 5 แผ่น) →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">© 2026 Gittisak Tongob</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const view = document.getElementById('view');
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+view.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1c1d1b);
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x333330, 0.6));
+const sun = new THREE.DirectionalLight(0xffffff, 1.2); sun.position.set(3, 5, 4); scene.add(sun);
+
+const camera = new THREE.PerspectiveCamera(40, 1, 0.01, 100);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.autoRotateSpeed = 1.2;
+
+function resize() {
+  const w = view.clientWidth, h = view.clientHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(view); resize();
+
+const PARTS = {
+  tray:    { name: 'Oil Tray (ถาดรองน้ำมัน)', color: 0xb3201c },
+  roller:  { name: 'ลูกกลิ้ง (Roller)',         color: 0xd4d6d8 },
+  frame:   { name: 'โครง C / L Channel',       color: 0xc9b48c },
+  guard:   { name: 'การ์ด (Guards)',            color: 0xf0d000 },
+  stopper: { name: 'Stopper',                  color: 0xff7333 },
+  bolt:    { name: 'สกรู / น็อต',               color: 0x3f4044 },
+};
+const groups = {};
+let center = new THREE.Vector3(), radius = 1, model;
+
+const MODEL_URL = 'models/roller-conveyor-oil-tray.glb';
+const loader = new GLTFLoader();
+const loadMsg = (t) => { document.getElementById('loading').firstChild.textContent = t; };
+const onProgress = (e) => {
+  if (e.total) { const p = Math.round(e.loaded / e.total * 100); document.getElementById('bar').style.width = p + '%'; document.getElementById('pct').textContent = p + '%'; }
+};
+const onFail = (err) => { console.error(err); loadMsg('โหลดโมเดลไม่สำเร็จ ลองรีเฟรชหน้า'); };
+
+// Fallback for pages opened straight from disk (file://), where browsers block
+// fetching the .glb: load the same model embedded as base64 via a <script> tag.
+function loadEmbedded() {
+  loadMsg('กำลังโหลดโมเดล 3D…');
+  const s = document.createElement('script');
+  s.src = MODEL_URL + '.js';
+  s.onload = () => {
+    const bin = atob(window.__MODEL_GLB_B64);
+    const buf = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+    delete window.__MODEL_GLB_B64;
+    loader.parse(buf.buffer, '', onModel, onFail);
+  };
+  s.onerror = onFail;
+  document.head.appendChild(s);
+}
+
+if (location.protocol === 'file:') loadEmbedded();
+else loader.load(MODEL_URL, onModel, onProgress, loadEmbedded);
+
+function onModel(g) {
+  model = g.scene;
+  const root = model.getObjectByName('root');
+  if (root) root.quaternion.identity(); // model is already Y-up
+  model.traverse((o) => {
+    if (!o.isMesh) return;
+    o.geometry.computeVertexNormals();
+    const key = o.name in PARTS ? o.name : (o.parent && o.parent.name in PARTS ? o.parent.name : null);
+    const m = o.material;
+    if (key) {
+      m.color.setHex(PARTS[key].color);
+      (groups[key] = groups[key] || []).push(o);
+    }
+    m.side = THREE.DoubleSide;
+    o.userData.baseColor = m.color.clone();
+  });
+  scene.add(model);
+  const box = new THREE.Box3().setFromObject(model);
+  const size = box.getSize(new THREE.Vector3());
+  box.getCenter(center);
+  radius = size.length() / 2;
+  const grid = new THREE.GridHelper(radius * 4, 24, 0x4a4b45, 0x2e2f2b);
+  grid.position.set(center.x, box.min.y - 0.001, center.z); scene.add(grid);
+  buildParts();
+  setView('iso');
+  document.getElementById('loading').style.display = 'none';
+}
+
+function buildParts() {
+  const el = document.getElementById('parts');
+  for (const [k, p] of Object.entries(PARTS)) {
+    if (!groups[k]) continue;
+    const d = document.createElement('div');
+    d.className = 'part';
+    d.innerHTML = `<i style="background:#${p.color.toString(16).padStart(6, '0')}"></i><span class="n">${p.name}</span>`;
+    d.onclick = () => { const vis = d.classList.toggle('off'); groups[k].forEach(m => m.visible = !vis); };
+    el.appendChild(d);
+  }
+}
+
+function setView(v) {
+  const d = radius * 2.75;
+  const dir = { iso: [1, 0.75, 1.2], front: [0, 0.15, 1], side: [1, 0.15, 0], top: [0, 1, 0.0001] }[v];
+  const vec = new THREE.Vector3(...dir).normalize().multiplyScalar(d);
+  camera.position.copy(center).add(vec);
+  controls.target.copy(center); controls.update();
+  document.querySelectorAll('[data-view]').forEach(b => b.classList.toggle('on', b.dataset.view === v));
+}
+document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => setView(b.dataset.view));
+
+const btnSpin = document.getElementById('btnSpin');
+btnSpin.onclick = () => { controls.autoRotate = !controls.autoRotate; btnSpin.classList.toggle('on', controls.autoRotate); };
+
+let trayHi = false;
+const btnTray = document.getElementById('btnTray');
+btnTray.onclick = () => {
+  trayHi = !trayHi; btnTray.classList.toggle('on', trayHi);
+  for (const [k, list] of Object.entries(groups)) list.forEach(m => {
+    m.material.transparent = trayHi && k !== 'tray';
+    m.material.opacity = trayHi && k !== 'tray' ? 0.12 : 1;
+    m.material.depthWrite = !(trayHi && k !== 'tray');
+    if (k === 'tray') m.material.emissive.setHex(trayHi ? 0x400000 : 0);
+  });
+  if (xray) { xray = false; document.getElementById('btnXray').classList.remove('on'); }
+};
+
+let xray = false;
+const btnXray = document.getElementById('btnXray');
+btnXray.onclick = () => {
+  xray = !xray; btnXray.classList.toggle('on', xray);
+  if (trayHi) { trayHi = false; btnTray.classList.remove('on'); }
+  for (const [k, list] of Object.entries(groups)) list.forEach(m => {
+    m.material.transparent = xray; m.material.opacity = xray ? 0.35 : 1; m.material.depthWrite = !xray;
+    if (k === 'tray') m.material.emissive.setHex(0);
+  });
+};
+
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+</script>
+</body>
+</html>

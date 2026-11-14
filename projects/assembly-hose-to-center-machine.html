@@ -78,11 +78,18 @@
     #view { height:380px; }
     .mc-grid { grid-template-columns:1fr; }
   }
+  .navr { display:flex; align-items:center; gap:10px; }
+  .btn-lang { background:transparent; color:var(--ink); border:1px solid var(--line2); padding:9px 16px; border-radius:999px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; white-space:nowrap; transition:all .2s; }
+  .btn-lang:hover { border-color:var(--lime); color:var(--lime); background:transparent; }
+  @media (max-width:760px) { .btn-lang { padding:8px 12px; font-size:12px; } .navr { gap:6px; } }
 </style>
 <body>
 <nav class="topnav"><div class="topnav-in">
   <a class="logo" href="../index.html"><i></i>GITTISAK TONGOB</a>
-  <a class="back" href="../index.html#projects">← Back to Resume</a>
+  <div class="navr">
+    <button type="button" class="btn-lang" id="lang-toggle" aria-label="Switch language / เปลี่ยนภาษา">EN</button>
+    <a class="back" href="../index.html#projects">← Back to Resume</a>
+  </div>
 </div></nav>
 <header>
   <div class="eyebrow">PROJECT · MACHINE DESIGN · 3D SIMULATION</div>
@@ -177,6 +184,87 @@ const $ = (s) => document.querySelector(s);
 const V3 = THREE.Vector3;
 
 // ---------------------------------------------------------------- ขั้นตอน (ตรงกับ Time chart แผน 4)
+/* ---- i18n (TH/EN) ---- */
+const EN_DICT = {
+ "ออกแบบเครื่องประกอบท่อเข้ากับเซ็นเตอร์ (T-6 Rev.4) — ภาพจำลอง 3D จากโมเดล CAD จริง ชิ้นส่วนทั้งหมดมาจากไฟล์ STEP ขยับตาม Time chart พร้อมกราฟกระจายรอบเวลา (Monte Carlo)": "Machine design for assembling hoses onto the center piece (T-6 Rev.4) — a 3D simulation built from the real CAD model. Every part comes from the STEP file and moves according to the time chart, with a cycle-time distribution chart (Monte Carlo).",
+ "1. ภาพ 3D จาก CAD (ลากซ้าย = หมุน · ลากขวา/Shift = เลื่อน · ล้อเมาส์ = ซูม)": "1. 3D view from CAD (left-drag = rotate · right-drag/Shift = pan · wheel = zoom)",
+ "กำลังโหลดโมเดล CAD… (ประมาณ 650,000 สามเหลี่ยม)": "Loading CAD model… (about 650,000 triangles)",
+ "⟲ เริ่มใหม่": "⟲ Reset",
+ "ความเร็ว": "Speed",
+ "เวลา": "Time",
+ "มุมมอง": "View",
+ "ทั้งเครื่อง": "Whole machine",
+ "jig + ดันท่อ": "Jig + hose pusher",
+ "ซ่อนโต๊ะ/โครงล่าง": "Hide table / lower frame",
+ "ทิศหมุน upper jig (มองจากบน): A": "Upper jig rotation direction (top view): A",
+ "ตามเข็ม": "Clockwise",
+ "ทวนเข็ม": "Counter-clockwise",
+ "ระยะยก/ลำดับ": "Lift distance / sequence",
+ "แบบ 2: A และ B ยก 20 + เลื่อนถอย 70 mm (SMC CQMB16-25 + MXQ16-75)": "Type 2: A and B lift 20 + slide back 70 mm (SMC CQMB16-25 + MXQ16-75)",
+ "แบบแก้: A ยกตรง 40 mm เปิดก่อน B": "Revised: A lifts straight 40 mm, opens before B",
+ "แบบเดิม: ยกตรง 20 mm พร้อมกัน": "Original: both lift straight 20 mm together",
+ "สีแดง = หมุนถึงมุมที่ชน (เช็กจากรูปทรง CAD)": "Red = rotated to a colliding angle (checked from CAD geometry)",
+ "เปลี่ยนรุ่น": "Model change",
+ "รุ่น": "Model",
+ "Rotary สาย B": "Rotary, line B",
+ "เลือกรุ่นแล้วรอบหยุดรอ เซ็นเตอร์ในมือ Robot/กล่อง/jig เปลี่ยนตามรุ่น (ครึ่งปลาย B ของเซ็นเตอร์หมุนตาม Rotary) Rotary DGM200R หมุนสายท่อ B ทั้งชุด (แคร่, POPUP B, ราง) รอบจุดตัดแกนท่อ และ Servo HG-KR13B 2 ตัวเลื่อนฐานแคร่ A/B ทั้งชุด เซ็นเตอร์ 3D สร้างจากขนาดใน Drawing ทั้ง 13 แบบ ค่าเริ่มต้นคำนวณจากรูปทรง (Rotary = มุมงอ − 90°, Servo = ระยะปากซ็อกเก็ตต่างจาก F0210)": "After selecting a model, the cycle pauses; the center piece in the robot hand / box / jig changes to match (the B-end half of the center piece rotates with the Rotary). The Rotary DGM200R rotates the whole B hose line (carriage, POPUP B, chute) about the hose-axis intersection point, and two Servo HG-KR13B units slide the whole A/B carriage bases. The 3D center piece is built from the dimensions in all 13 drawings. Default values are calculated from the geometry (Rotary = bend angle − 90°, Servo = socket-mouth distance difference from F0210).",
+ "ยังไม่ได้ยืนยันกับผู้ออกแบบ": "Not yet confirmed with the designer",
+ "แก้ตัวเลขได้ และเบราว์เซอร์จะจำค่าที่แก้ไว้ ยังไม่ได้เช็กการชนตอนหมุนสาย B": "Values are editable and the browser remembers your edits. Collisions while rotating line B have not been checked yet.",
+ "Clamp/ตัวจับท่อ": "Clamp / hose gripper",
+ "ตัวป้อน": "Feeder",
+ "2. เวลาแต่ละขั้น (ปรับได้)": "2. Time per step (adjustable)",
+ "รอบเวลา (วินาที)": "Cycle time (s)",
+ "ชิ้น/ชั่วโมง": "Pieces / hour",
+ "ชิ้นเสร็จ (ในภาพ)": "Finished pieces (in view)",
+ "ตัวหนังสือสีแดง = ขั้นบนเส้นทางวิกฤต (ลดเวลาขั้นนี้แล้วรอบเวลาลดลงจริง)": "Red text = step on the critical path (shortening this step actually shortens the cycle time)",
+ "3. กราฟกระจายรอบเวลา (Monte Carlo)": "3. Cycle-time distribution (Monte Carlo)",
+ "ความแปรปรวนของเวลา ±": "Time variability ±",
+ "จำนวนรอบ": "Runs",
+ "▶ สุ่มรอบเวลา": "▶ Run simulation",
+ "ขั้นที่ส่งผลต่อรอบเวลามากสุด (สหสัมพันธ์)": "Steps affecting cycle time most (correlation)",
+ "สุ่มเวลาแต่ละขั้นแบบสามเหลี่ยม (min–ค่าตั้ง–max) ช่วง ±ตามแถบด้านบน ขั้นที่ใช้ vision (หยิบเซ็นเตอร์จากกล่อง) ผันผวนมากกว่า 1.8 เท่า และขั้นของ Robot 1.2 เท่า เพราะมักเปลี่ยนตามตำแหน่งชิ้นงาน เส้นประเขียว/ส้ม = เป้าหมาย 4 s / 6 s เส้นฟ้า = ค่าตั้งปัจจุบัน เส้นแดง = ค่าเฉลี่ย": "Each step's time is sampled from a triangular distribution (min–setpoint–max) with the ± range from the slider above. The vision step (picking the center piece from the box) varies 1.8× more and Robot steps 1.2× more, since they usually depend on part position. Dashed green/orange = 4 s / 6 s targets; blue line = current setpoint; red line = mean.",
+ "ตัวจับท่อ": "Gripper",
+ "Robot: หยิบชิ้นเสร็จออกจาก jig": "Robot: pick finished piece from jig",
+ "Robot: วางเซ็นเตอร์ใหม่ลง jig": "Robot: place new center piece on jig",
+ "Upper jig A+B: เลื่อนกลับ + กดลง": "Upper jig A+B: slide back + press down",
+ "Sensor: ตรวจชิ้นงานเข้าที่": "Sensor: check workpiece in place",
+ "ตัวจับท่อ A+B: จับ": "Hose gripper A+B: grip",
+ "Cylinder: ดันท่อ A+B เข้า": "Cylinder: push hoses A+B in",
+ "Sensor: ตรวจปลาย stroke / ความลึก": "Sensor: check stroke end / depth",
+ "ตัวจับท่อ A+B: ปล่อย": "Hose gripper A+B: release",
+ "Cylinder: ถอยกลับ": "Cylinder: retract",
+ "Upper jig A+B: ยกขึ้น + เลื่อนออก": "Upper jig A+B: lift + slide out",
+ "POPUP350: ยกท่อ → หล่นลงราง (หลัง Robot หยิบชิ้นเสร็จออก)": "POPUP350: lift hose → drop into chute (after Robot removes finished piece)",
+ "Robot: ไปวางที่กล่อง Finish Good": "Robot: place in Finish Good box",
+ "Robot: หยิบเซ็นเตอร์ถัดไป (กล้อง)": "Robot: pick next center piece (camera)",
+ "Robot: กลับมาที่ jig": "Robot: return to jig",
+ "⏸ หยุด": "⏸ Pause",
+ "▶ เล่น": "▶ Play",
+ "รอบ {c} s": "cycle {c} s",
+ "รอ…": "waiting…",
+ "กำลังเปลี่ยนรุ่น…": "Changing model…",
+ "งอ": "bend",
+ "⚠ Rotary มุมนี้ชน: หมุนเข้าหาสาย A ตั้งแต่ +10° ชน jig/ฐานรอง/โครง (ช่วงที่เช็กแล้วไม่ชน = −90° ถึง 0°)": "⚠ Rotary collides at this angle: rotating toward line A from +10° hits the jig / base plate / frame (checked collision-free range = −90° to 0°)",
+ "⚠ เกิน −90° ยังไม่ได้เช็กชน": "⚠ Beyond −90°: collision not yet checked",
+ "ค่าเฉลี่ย": "Mean",
+ "ส่วนเบี่ยงเบนมาตรฐาน": "Std. deviation",
+ "ต่ำสุด – สูงสุด": "Min – Max",
+ "ชิ้น/ชม. ที่ค่าเฉลี่ย": "Pieces/hr at mean",
+ "โอกาสที่รอบ ≤ 4 s": "P(cycle ≤ 4 s)",
+ "โอกาสที่รอบ ≤ 6 s": "P(cycle ≤ 6 s)",
+ "โอกาสที่รอบ ≤ ค่าตั้ง {c} s": "P(cycle ≤ setpoint {c} s)",
+ "สุ่ม {n} รอบ ความแปรปรวน ±{p}%": "Simulated {n} cycles, variability ±{p}%",
+ "ค่าตั้ง": "setpoint",
+ "เฉลี่ย": "mean",
+ "รอบเวลา (วินาที/ชิ้น)": "Cycle time (s/piece)",
+ "โหลดโมเดลไม่สำเร็จ:": "Failed to load model:"
+};
+let LANG = 'th'; try { LANG = localStorage.getItem('lang') === 'en' ? 'en' : 'th'; } catch (e) { /* ignore */ }
+function TR(s, vars) {
+  let r = (LANG === 'en' && EN_DICT[s]) ? EN_DICT[s] : s;
+  if (vars) for (const k in vars) r = r.split('{' + k + '}').join(vars[k]);
+  return r;
+}
 const STEPS = [
   { n: 'Robot: หยิบชิ้นเสร็จออกจาก jig',      d: 1.0, dep: [],      lane: 0 },
   { n: 'Robot: วางเซ็นเตอร์ใหม่ลง jig',        d: 1.0, dep: [1],     lane: 0 },
@@ -616,7 +704,7 @@ window.addEventListener('resize', resize);
 const stepsEl = $('#steps');
 const rows = STEPS.map((s, i) => {
   const d = document.createElement('div'); d.className = 'step';
-  d.innerHTML = '<span class="nm">' + (i + 1) + '. ' + s.n + '</span><input type="range" min="0.1" max="6" step="0.1" value="' + s.d + '"><span class="val">' + s.d.toFixed(1) + ' s</span>';
+  d.innerHTML = '<span class="nm">' + (i + 1) + '. ' + TR(s.n) + '</span><input type="range" min="0.1" max="6" step="0.1" value="' + s.d + '"><span class="val">' + s.d.toFixed(1) + ' s</span>';
   stepsEl.appendChild(d);
   const inp = d.querySelector('input'), val = d.querySelector('.val');
   inp.addEventListener('input', () => { durs[i] = parseFloat(inp.value); val.textContent = durs[i].toFixed(1) + ' s'; S = schedule(durs); refreshKpi(); });
@@ -638,7 +726,7 @@ function drawGantt(t) {
   gctx.font = '11px sans-serif'; gctx.textBaseline = 'middle';
   LANES.forEach((ln, k) => {
     const y = T + k * rh; gctx.fillStyle = k % 2 ? '#141412' : '#1b1b18'; gctx.fillRect(L, y, W - L - R, rh);
-    gctx.fillStyle = '#c9c7c2'; gctx.fillText(ln[0], 4, y + rh / 2);
+    gctx.fillStyle = '#c9c7c2'; gctx.fillText(TR(ln[0]), 4, y + rh / 2);
   });
   STEPS.forEach((s, i) => {
     const y = T + s.lane * rh + 2; gctx.fillStyle = LANES[s.lane][1]; gctx.globalAlpha = (t >= S.st[i] && t < S.en[i]) ? 1 : 0.62;
@@ -649,8 +737,8 @@ function drawGantt(t) {
   gctx.strokeStyle = '#ff5c5c'; gctx.lineWidth = 2; gctx.beginPath(); gctx.moveTo(px(t), T); gctx.lineTo(px(t), H - B); gctx.stroke(); gctx.lineWidth = 1;
 }
 function updateHud(t) {
-  const act = []; STEPS.forEach((s, i) => { if (t >= S.st[i] && t < S.en[i]) act.push(s.n); });
-  $('#hud').innerHTML = '<b>t = ' + t.toFixed(2) + ' s</b> / รอบ ' + S.cycle.toFixed(1) + ' s<br>' + (act.length ? act.map((a) => '▸ ' + a).join('<br>') : 'รอ…');
+  const act = []; STEPS.forEach((s, i) => { if (t >= S.st[i] && t < S.en[i]) act.push(TR(s.n)); });
+  $('#hud').innerHTML = '<b>t = ' + t.toFixed(2) + ' s</b> / ' + TR('รอบ {c} s', { c: S.cycle.toFixed(1) }) + '<br>' + (act.length ? act.map((a) => '▸ ' + a).join('<br>') : TR('รอ…'));
   rows.forEach((r, i) => r.classList.toggle('act', t >= S.st[i] && t < S.en[i]));
   $('#kCnt').textContent = finishedCount;
 }
@@ -660,16 +748,16 @@ let curT = 0, playing = true, speed = 1, last = performance.now();
 function reset() { curT = 0; clearFinished(); }
 function frame(now) {
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
-  const chg = window.__ready && stepChange(dt * Math.max(1, speed)); $('#chgInfo').textContent = chg ? 'กำลังเปลี่ยนรุ่น… Rotary ' + CH.ang.toFixed(1) + '° · Servo A ' + CH.sa.toFixed(1) + ' · B ' + CH.sb.toFixed(1) + ' mm' : '';
+  const chg = window.__ready && stepChange(dt * Math.max(1, speed)); $('#chgInfo').textContent = chg ? TR('กำลังเปลี่ยนรุ่น…') + ' Rotary ' + CH.ang.toFixed(1) + '° · Servo A ' + CH.sa.toFixed(1) + ' · B ' + CH.sb.toFixed(1) + ' mm' : '';
   if (playing && !chg) { curT += dt * speed; if (curT >= S.cycle) { curT -= S.cycle; addFinished(); } }
   $('#scrub').value = Math.round(1000 * curT / S.cycle);
   setTime(curT); drawGantt(curT); renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }
-$('#btnPlay').addEventListener('click', () => { playing = !playing; $('#btnPlay').textContent = playing ? '⏸ หยุด' : '▶ เล่น'; });
+$('#btnPlay').addEventListener('click', () => { playing = !playing; $('#btnPlay').textContent = playing ? TR('⏸ หยุด') : TR('▶ เล่น'); });
 $('#btnReset').addEventListener('click', reset);
 $('#speed').addEventListener('input', (e) => { speed = parseFloat(e.target.value); $('#speedv').textContent = speed.toFixed(1) + '×'; });
-$('#scrub').addEventListener('input', (e) => { playing = false; $('#btnPlay').textContent = '▶ เล่น'; curT = S.cycle * e.target.value / 1000; });
+$('#scrub').addEventListener('input', (e) => { playing = false; $('#btnPlay').textContent = TR('▶ เล่น'); curT = S.cycle * e.target.value / 1000; });
 
 
 // ---------------------------------------------------------------- เปลี่ยนรุ่น
@@ -678,10 +766,11 @@ let MV = {}; try { MV = JSON.parse(localStorage.getItem(MKEY) || '{}') || {}; } 
 function mval(name, d) { return MV[name] || { ang: d.ang, sa: d.sa, sb: d.sb }; }
 function initModels() {
   const sel = $('#model');
-  C.models.forEach(([n, d]) => { const o = document.createElement('option'); o.value = n; o.textContent = (d.fam === 'D' ? 'T-BFJ-' : 'A-BFJ-') + n + ' (งอ ' + d.b + '°)'; sel.appendChild(o); });
+  C.models.forEach(([n, d]) => { const o = document.createElement('option'); o.value = n; o.dataset.pre = (d.fam === 'D' ? 'T-BFJ-' : 'A-BFJ-'); o.dataset.b = d.b; o.textContent = o.dataset.pre + n + ' (' + TR('งอ') + ' ' + d.b + '°)'; sel.appendChild(o); });
   sel.value = 'F0210';
   const show = (v) => { $('#cAng').value = v.ang; $('#cSa').value = v.sa; $('#cSb').value = v.sb; };
-  const warn = () => { $('#chgWarn').textContent = CT.ang > 5 ? '⚠ Rotary มุมนี้ชน: หมุนเข้าหาสาย A ตั้งแต่ +10° ชน jig/ฐานรอง/โครง (ช่วงที่เช็กแล้วไม่ชน = −90° ถึง 0°)' : (CT.ang < -90 ? '⚠ เกิน −90° ยังไม่ได้เช็กชน' : ''); };
+  const warn = () => { $('#chgWarn').textContent = CT.ang > 5 ? TR('⚠ Rotary มุมนี้ชน: หมุนเข้าหาสาย A ตั้งแต่ +10° ชน jig/ฐานรอง/โครง (ช่วงที่เช็กแล้วไม่ชน = −90° ถึง 0°)') : (CT.ang < -90 ? TR('⚠ เกิน −90° ยังไม่ได้เช็กชน') : ''); };
+  window.__warn = warn;
   const go = () => { const md = C.models.find((x) => x[0] === sel.value); const v = mval(md[0], md[1]); setModel(md[0]); show(v); CT.ang = v.ang; CT.sa = v.sa; CT.sb = v.sb; warn(); };
   sel.addEventListener('change', go);
   ['#cAng', '#cSa', '#cSb'].forEach((id) => $(id).addEventListener('change', () => {
@@ -702,22 +791,22 @@ function runMC() {
     const d = base.map((m, i) => { const f = (i === 12) ? 1.8 : (STEPS[i].lane === 0 ? 1.2 : 1); const w = Math.min(0.9, sp * f); const v = tri(m * (1 - w), m, m * (1 + w)); samples[i][k] = v; return v; });
     cyc[k] = schedule(d).cycle;
   }
-  drawHist(cyc, base); showStats(cyc, samples);
+  window.__mc = { cyc: cyc, base: base, samples: samples }; drawHist(cyc, base); showStats(cyc, samples);
 }
 function pct(sorted, p) { return sorted[Math.min(sorted.length - 1, Math.floor(p * sorted.length))]; }
 function showStats(cyc, samples) {
   const n = cyc.length, sorted = Array.from(cyc).sort((a, b) => a - b);
   const mean = sorted.reduce((a, b) => a + b, 0) / n, sd = Math.sqrt(sorted.reduce((a, b) => a + (b - mean) * (b - mean), 0) / n);
   const le = (x) => (100 * sorted.filter((v) => v <= x).length / n).toFixed(1) + '%';
-  const rowsH = [['ค่าเฉลี่ย', mean.toFixed(2) + ' s'], ['ส่วนเบี่ยงเบนมาตรฐาน', sd.toFixed(2) + ' s'], ['P5 / P50 / P95', pct(sorted, .05).toFixed(2) + ' / ' + pct(sorted, .5).toFixed(2) + ' / ' + pct(sorted, .95).toFixed(2) + ' s'],
-    ['ต่ำสุด – สูงสุด', sorted[0].toFixed(2) + ' – ' + sorted[n - 1].toFixed(2) + ' s'], ['ชิ้น/ชม. ที่ค่าเฉลี่ย', Math.round(3600 / mean) + ''],
-    ['โอกาสที่รอบ ≤ 4 s', le(4)], ['โอกาสที่รอบ ≤ 6 s', le(6)], ['โอกาสที่รอบ ≤ ค่าตั้ง ' + S.cycle.toFixed(1) + ' s', le(S.cycle + 1e-9)]];
+  const rowsH = [[TR('ค่าเฉลี่ย'), mean.toFixed(2) + ' s'], [TR('ส่วนเบี่ยงเบนมาตรฐาน'), sd.toFixed(2) + ' s'], ['P5 / P50 / P95', pct(sorted, .05).toFixed(2) + ' / ' + pct(sorted, .5).toFixed(2) + ' / ' + pct(sorted, .95).toFixed(2) + ' s'],
+    [TR('ต่ำสุด – สูงสุด'), sorted[0].toFixed(2) + ' – ' + sorted[n - 1].toFixed(2) + ' s'], [TR('ชิ้น/ชม. ที่ค่าเฉลี่ย'), Math.round(3600 / mean) + ''],
+    [TR('โอกาสที่รอบ ≤ 4 s'), le(4)], [TR('โอกาสที่รอบ ≤ 6 s'), le(6)], [TR('โอกาสที่รอบ ≤ ค่าตั้ง {c} s', { c: S.cycle.toFixed(1) }), le(S.cycle + 1e-9)]];
   $('#stats').innerHTML = rowsH.map((r) => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('');
   // สหสัมพันธ์
   const corr = STEPS.map((s, i) => { let sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0; for (let k = 0; k < n; k++) { const x = samples[i][k], y = cyc[k]; sx += x; sy += y; sxx += x * x; syy += y * y; sxy += x * y; } const cv = sxy / n - (sx / n) * (sy / n), vx = sxx / n - (sx / n) * (sx / n), vy = syy / n - (sy / n) * (sy / n); return vx > 1e-12 && vy > 1e-12 ? cv / Math.sqrt(vx * vy) : 0; });
   const order = corr.map((c, i) => [c, i]).sort((a, b) => b[0] - a[0]).slice(0, 6).filter((o) => o[0] > 0.05);
-  $('#sens').innerHTML = order.map((o) => '<tr><td>' + (o[1] + 1) + '. ' + STEPS[o[1]].n + '</td><td><span class="bar" style="width:' + Math.round(60 * o[0]) + 'px"></span> ' + o[0].toFixed(2) + '</td></tr>').join('') || '<tr><td>–</td></tr>';
-  $('#mcInfo').textContent = 'สุ่ม ' + n.toLocaleString() + ' รอบ ความแปรปรวน ±' + $('#spread').value + '%';
+  $('#sens').innerHTML = order.map((o) => '<tr><td>' + (o[1] + 1) + '. ' + TR(STEPS[o[1]].n) + '</td><td><span class="bar" style="width:' + Math.round(60 * o[0]) + 'px"></span> ' + o[0].toFixed(2) + '</td></tr>').join('') || '<tr><td>–</td></tr>';
+  $('#mcInfo').textContent = TR('สุ่ม {n} รอบ ความแปรปรวน ±{p}%', { n: n.toLocaleString(), p: $('#spread').value });
 }
 function drawHist(cyc, base) {
   const cv = $('#hist'), ctx = cv.getContext('2d'), dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -731,13 +820,43 @@ function drawHist(cyc, base) {
   cnt.forEach((c, b) => { const x0 = px(lo + b * bw), x1 = px(lo + (b + 1) * bw); const mid = lo + (b + .5) * bw; ctx.fillStyle = mid <= 4 ? '#548235' : (mid <= 6 ? '#C77700' : '#2E75B6'); ctx.globalAlpha = 0.85; ctx.fillRect(x0 + 0.5, py(c), Math.max(1, x1 - x0 - 1), (H - B) - py(c)); ctx.globalAlpha = 1; });
   function vline(x, col, lab, dash, yoff) { ctx.save(); ctx.strokeStyle = col; ctx.lineWidth = 2; if (dash) ctx.setLineDash([6, 4]); ctx.beginPath(); ctx.moveTo(px(x), T); ctx.lineTo(px(x), H - B); ctx.stroke(); ctx.restore(); ctx.fillStyle = col; ctx.fillText(lab, px(x) + 4, T + 10 + yoff); }
   vline(4, '#548235', '4 s', true, 0); vline(6, '#C77700', '6 s', true, 0);
-  vline(S.cycle, '#2E75B6', 'ค่าตั้ง ' + S.cycle.toFixed(1), false, 14);
-  let mean = 0; for (let i = 0; i < n; i++) mean += cyc[i]; mean /= n; vline(mean, '#ff5c5c', 'เฉลี่ย ' + mean.toFixed(2), false, 28);
+  vline(S.cycle, '#2E75B6', TR('ค่าตั้ง') + ' ' + S.cycle.toFixed(1), false, 14);
+  let mean = 0; for (let i = 0; i < n; i++) mean += cyc[i]; mean /= n; vline(mean, '#ff5c5c', TR('เฉลี่ย') + ' ' + mean.toFixed(2), false, 28);
   ctx.fillStyle = '#9a9a95'; for (let x = Math.ceil(lo); x <= hi; x++) ctx.fillText(x + '', px(x) - 3, H - 18);
-  ctx.fillText('รอบเวลา (วินาที/ชิ้น)', W / 2 - 50, H - 4);
+  ctx.fillText(TR('รอบเวลา (วินาที/ชิ้น)'), W / 2 - 50, H - 4);
 }
 $('#btnRun').addEventListener('click', runMC);
 $('#spread').addEventListener('input', (e) => { $('#spreadv').textContent = e.target.value + '%'; });
+
+// ---------------------------------------------------------------- ภาษา TH / EN (ใช้ค่า 'lang' ตัวเดียวกับหน้าหลัก)
+const I18N_SKIP = '#btnPlay,#hud,#steps,#stats,#sens,#chgInfo,#chgWarn,#mcInfo,#model';
+function applyLang() {
+  document.documentElement.lang = LANG;
+  const tw = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+    acceptNode: (n) => {
+      const p = n.parentElement;
+      if (!p || /^(SCRIPT|STYLE)$/.test(p.tagName) || p.closest(I18N_SKIP)) return NodeFilter.FILTER_REJECT;
+      return /\S/.test(n.nodeValue) || n.__th ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+    }
+  });
+  let n; while ((n = tw.nextNode())) {
+    if (n.__th === undefined) n.__th = n.nodeValue;
+    const m = n.__th.match(/^(\s*)([\s\S]*?)(\s*)$/), key = m[2].replace(/\s+/g, ' ');
+    n.nodeValue = (LANG === 'en' && EN_DICT[key]) ? m[1] + EN_DICT[key] + m[3] : n.__th;
+  }
+  $('#lang-toggle').textContent = LANG === 'th' ? 'EN' : 'TH';
+  $('#btnPlay').textContent = playing ? TR('⏸ หยุด') : TR('▶ เล่น');
+  rows.forEach((r, i) => { r.querySelector('.nm').textContent = (i + 1) + '. ' + TR(STEPS[i].n); });
+  [].forEach.call($('#model').options, (o) => { o.textContent = o.dataset.pre + o.value + ' (' + TR('งอ') + ' ' + o.dataset.b + '°)'; });
+  if (window.__warn) window.__warn();
+  if (window.__mc) { drawHist(window.__mc.cyc, window.__mc.base); showStats(window.__mc.cyc, window.__mc.samples); }
+}
+function toggleLang() {
+  LANG = LANG === 'th' ? 'en' : 'th';
+  try { localStorage.setItem('lang', LANG); } catch (e) { /* ignore */ }
+  applyLang();
+}
+$('#lang-toggle').addEventListener('click', toggleLang);
 
 // ---------------------------------------------------------------- เริ่มต้น
 refreshKpi(); updateCamera(); resize();
@@ -747,11 +866,12 @@ $('#clMode').addEventListener('change', (e) => { CLMODE = e.target.value; });
 $('#chkFrame').addEventListener('change', (e) => frameObjs.forEach((o) => { o.visible = !e.target.checked; }));
 const hp = new URLSearchParams((location.hash || '').replace(/^#/, ''));
 if (hp.has('cam')) { const c = hp.get('cam').split(',').map(parseFloat); cam.yaw = c[0]; cam.pitch = c[1]; cam.dist = c[2]; updateCamera(); }
-if (hp.has('t')) { curT = parseFloat(hp.get('t')); playing = false; $('#btnPlay').textContent = '▶ เล่น'; }
+if (hp.has('t')) { curT = parseFloat(hp.get('t')); playing = false; $('#btnPlay').textContent = TR('▶ เล่น'); }
 if (hp.has('mc')) runMC();
 if (hp.has('v')) setView(hp.get('v'));
 if (hp.has('cam')) { const c = hp.get('cam').split(',').map(parseFloat); cam.yaw = c[0]; cam.pitch = c[1]; cam.dist = c[2]; if (c.length >= 6) cam.target.set(c[3], c[4], c[5]); updateCamera(); }   // ทดสอบ: กล้องกำหนดเอง (yaw,pitch,dist[,tx,ty,tz])
 if (hp.has('noframe')) { $('#chkFrame').checked = true; }
+applyLang();
 loadModel().then(() => {
   buildScene(); initParts();
   ['#dirA', '#dirB'].forEach((s, k) => { clampG[k].userData.dir = parseInt($(s).value, 10); });
@@ -759,7 +879,7 @@ loadModel().then(() => {
   if ($('#chkFrame').checked) frameObjs.forEach((o) => { o.visible = false; });
   if (/solo/.test(location.hash)) root.children.forEach((c) => { if (liveParts.indexOf(c) < 0 && c !== cmpMesh) c.visible = false; });   // ทดสอบ: ดูเฉพาะเซ็นเตอร์
   $('#loading').remove(); window.__ready = true; requestAnimationFrame(frame);
-}).catch((err) => { $('#loading').textContent = 'โหลดโมเดลไม่สำเร็จ: ' + err.message + ' | ' + String(err.stack).split(String.fromCharCode(10)).slice(0, 3).join(' / '); });
+}).catch((err) => { $('#loading').textContent = TR('โหลดโมเดลไม่สำเร็จ:') + ' ' + err.message + ' | ' + String(err.stack).split(String.fromCharCode(10)).slice(0, 3).join(' / '); });
 window.__sim = { setT: (t) => { playing = false; curT = t; }, runMC };
 })();
 </script>
