@@ -1,0 +1,30 @@
+# Editor/design-tool artifacts — not needed for the deployed site
+DESIGN-HANDOFF.md
+DESIGN-MANIFEST.json
+_image-slots.state.json
+_thumbnail
+image-slot.js
+support.js
+
+# Screenshots / draft images from the editor
+S__34398214.jpg
+audit-preview.png
+render-preview.png
+draw-*.png
+drawing-*.png
+pasted-*.png
+image.png
+image-[0-9].png
+
+# Duplicate root-level copies of files that live properly under assets/
+cert-auto-1.pdf
+cert-auto-1.png
+cert-plc-1.pdf
+cert-plc-1.png
+cert-scada-1.pdf
+cert-scada-1.png
+cert_files-*.pdf
+thesis-1.pdf
+
+# Editor config
+.vscode/

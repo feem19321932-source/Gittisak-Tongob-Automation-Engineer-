@@ -1,0 +1,12 @@
+# robots.txt for Automation Engineer Resume
+
+User-agent: *
+Allow: /
+
+# Disallow temporary/development files
+Disallow: /image-*.png
+Disallow: /drawing-*.png
+Disallow: /pasted-*.png
+
+# Sitemap
+Sitemap: https://gittisak.dev/sitemap.xml
