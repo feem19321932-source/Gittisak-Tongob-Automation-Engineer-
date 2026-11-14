@@ -5,6 +5,11 @@ const content = {
     navAbout: 'About',
     navSkills: 'Skills',
     navWork: 'Work',
+    navProjects: 'Projects',
+    projectsTitle: 'Projects',
+    projEyebrow: 'MY DESIGN · MACHINE DESIGN',
+    projDesc: 'ออกแบบเครื่องประกอบท่อเข้ากับเซ็นเตอร์ พร้อมภาพจำลอง 3D จากโมเดล CAD จริง แสดงลำดับการทำงานของ Robot, Jig, Cylinder และ Sensor ตาม Time chart และวิเคราะห์รอบเวลาด้วย Monte Carlo',
+    projCta: 'เปิดดู 3D Simulation →',
     navCerts: 'Certifications',
     navBack: '← Back Home',
     navContact: 'Contact Me',
@@ -44,6 +49,11 @@ const content = {
     navAbout: 'About',
     navSkills: 'Skills',
     navWork: 'Work',
+    navProjects: 'Projects',
+    projectsTitle: 'Projects',
+    projEyebrow: 'MY DESIGN · MACHINE DESIGN',
+    projDesc: 'Designed a machine that assembles hoses onto centers, with an interactive 3D simulation built from the real CAD model — showing the Robot, Jig, Cylinder and Sensor sequence from the time chart, plus Monte Carlo cycle-time analysis.',
+    projCta: 'Open 3D Simulation →',
     navCerts: 'Certifications',
     navBack: '← Back Home',
     navContact: 'Contact Me',
@@ -251,6 +261,7 @@ function updateContent() {
   navLinksHome.innerHTML = `
     <a href="#about">${c.navAbout}</a>
     <a href="#skills">${c.navSkills}</a>
+    <a href="#projects">${c.navProjects}</a>
     <a href="#work">${c.navWork}</a>
     <a href="javascript:void(0)" onclick="goToCerts()">${c.navCerts}</a>
   `;
@@ -284,6 +295,10 @@ function updateContent() {
   renderInternships();
 
   document.querySelector('#skills .h2').textContent = c.skillsTitle;
+  document.querySelector('#projects .h2').textContent = c.projectsTitle;
+  document.getElementById('proj-eyebrow').textContent = c.projEyebrow;
+  document.getElementById('proj-desc').textContent = c.projDesc;
+  document.getElementById('proj-cta').textContent = c.projCta;
   document.querySelector('#work .h2').textContent = c.eduTitle;
   document.querySelector('.section-head-row .h2').textContent = c.featuredCerts;
   document.querySelector('.section-head-row .btn-outline-pill').textContent = c.viewAll;
